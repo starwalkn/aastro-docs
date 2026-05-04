@@ -62,7 +62,7 @@ gateway:
 
 **pprof nuance:** the pprof server binds only to `localhost` — it is not accessible externally regardless of network configuration.
 
-**Metrics nuance:** with `exporter: prometheus`, a `/metrics` endpoint is exposed on the same port as the gateway. With `exporter: otlp`, no endpoint is exposed — metrics are pushed on the configured interval. See the [Metrics](/metrics) page for available metrics and Grafana setup.
+**Metrics nuance:** with `exporter: prometheus`, a `/metrics` endpoint is exposed on the same port as the gateway. With `exporter: otlp`, no endpoint is exposed — metrics are pushed on the configured interval. See the [Metrics](metrics) page for available metrics and Grafana setup.
 
 ## Routing
 ---

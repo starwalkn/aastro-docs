@@ -1,0 +1,19 @@
+{
+  "docsSidebar": [
+    {
+      "type": "category",
+      "label": "Docs",
+      "items": [
+        "intro",
+        "getting-started",
+        "configuration",
+        "response-format",
+        "metrics",
+        "tracing",
+        "plugin-development",
+        "builtins",
+        "passthrough"
+      ]
+    }
+  ]
+}

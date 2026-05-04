@@ -83,10 +83,10 @@ const config = {
     },
 
     url: 'https://your-docusaurus-site.example.com',
-    baseUrl: '/kono',
+    baseUrl: '/konodocs',
 
     organizationName: 'starwalkn',
-    projectName: 'kono',
+    projectName: 'konodocs',
     trailingSlash: false,
 
     onBrokenLinks: 'throw',

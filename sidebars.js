@@ -25,6 +25,7 @@ const sidebars = {
                 'configuration',
                 'response-format',
                 'metrics',
+                'tracing',
                 'plugin-development',
                 'builtins',
                 'passthrough'

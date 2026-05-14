@@ -37,41 +37,6 @@ const coldarkCold = {
     ],
 };
 
-const coldarkDark = {
-    plain: {
-        color: '#e3eaf2',
-        backgroundColor: '#111b27',
-    },
-    styles: [
-        { types: ['comment', 'prolog', 'doctype', 'cdata'], style: { color: '#8da1b9', fontStyle: 'italic' } },
-        { types: ['punctuation'], style: { color: '#e3eaf2' } },
-        { types: ['tag', 'delimiter'], style: { color: '#66cccc' } },
-        { types: ['attr-name', 'boolean', 'number', 'constant'], style: { color: '#e6d37a' } },
-        { types: ['class-name', 'key', 'parameter', 'property', 'variable'], style: { color: '#6cb8e6' } },
-        { types: ['string', 'attr-value', 'char', 'inserted'], style: { color: '#91d076' } },
-        { types: ['builtin', 'regex'], style: { color: '#f4adf4' } },
-        { types: ['function', 'selector'], style: { color: '#c699e3' } },
-        { types: ['keyword', 'operator', 'unit'], style: { color: '#e9ae7e' } },
-        { types: ['deleted', 'important'], style: { color: '#cd6660' } },
-    ],
-};
-
-const nord = {
-    plain: {
-        color: '#f8f8f2',
-        backgroundColor: '#2E3440',
-    },
-    styles: [
-        { types: ['comment', 'prolog', 'doctype', 'cdata'], style: { color: '#636f88', fontStyle: 'italic' } },
-        { types: ['punctuation', 'property', 'tag', 'constant', 'symbol', 'boolean', 'keyword', 'operator', 'variable'], style: { color: '#81A1C1' } },
-        { types: ['number'], style: { color: '#B48EAD' } },
-        { types: ['string', 'char', 'builtin', 'inserted', 'selector', 'attr-name'], style: { color: '#A3BE8C' } },
-        { types: ['function', 'class-name', 'atrule', 'attr-value'], style: { color: '#88C0D0' } },
-        { types: ['regex', 'important'], style: { color: '#EBCB8B' } },
-        { types: ['deleted'], style: { color: '#BF616A' } },
-    ],
-};
-
 /** @type {import('@docusaurus/types').Config} */
 const config = {
     title: 'Route. Aggregate. Extend.',
@@ -123,9 +88,10 @@ const config = {
             },
             announcementBar: {
                 id: 'contributors',
-                content: 'We are looking for active contributors',
-                backgroundColor: '#1A6FD4',
-                textColor: '#F0F4F8',
+                content: '✦  We are looking for active contributors',
+                // CSS overrides background/text — these stay as safe defaults
+                backgroundColor: '#EBF3FC',
+                textColor: '#1A6FD4',
                 isCloseable: true,
             },
             navbar: {
@@ -214,7 +180,7 @@ const config = {
                 copyright: `Copyright © ${new Date().getFullYear()} Alexander Pikeev.<br/>Built with Docusaurus.`,
             },
             prism: {
-                theme: coldarkDark,
+                theme: duotoneSea,
                 darkTheme: prismThemes.dracula,
                 additionalLanguages: ['bash'],
             },

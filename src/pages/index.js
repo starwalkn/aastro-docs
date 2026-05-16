@@ -18,7 +18,7 @@ function ReleaseBadge() {
             className="hero-badge"
             href="https://github.com/starwalkn/kono/releases">
             <span className="hero-badge__sparkle">✦</span>
-            <span><strong>0.3.1</strong>&nbsp;just released</span>
+            <span><strong>0.4.0</strong>&nbsp;just released</span>
             <span className="hero-badge__sep">—</span>
             <span>see what's new</span>
             <span className="hero-badge__arrow">→</span>

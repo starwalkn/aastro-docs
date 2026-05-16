@@ -113,10 +113,6 @@ const config = {
                         position: 'left',
                     },
                     {
-                        type: 'docsVersionDropdown',
-                        position: 'right',
-                    },
-                    {
                         href: 'https://github.com/starwalkn/kono',
                         className: 'header-github-link',
                         position: 'right',

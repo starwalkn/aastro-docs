@@ -33,8 +33,9 @@ gateway:
 | `metrics.otlp.interval` | duration | `60s`   | How often to push metrics to the OTLP endpoint |
 
 :::info
-When using `exporter: prometheus`, the `/metrics` endpoint is available on the same port as the gateway. When using
-`exporter: otlp`, no HTTP endpoint is exposed — metrics are pushed on the configured interval.
+When using `exporter: prometheus`, the `/metrics` endpoint is served on the **admin port** (`server.admin_port`), not the data port. This means Prometheus can scrape Kono over plain HTTP without needing a client certificate, even when the data port enforces mTLS. The admin port binds to `127.0.0.1` by default — see the [Server configuration](configuration#server) for details on exposing it to an external scraper.
+
+When using `exporter: otlp`, no HTTP endpoint is exposed — metrics are pushed on the configured interval.
 :::
 
 ## Available Metrics
@@ -70,7 +71,7 @@ The `kind` label on `kono_upstream_errors_total` reflects the internal error cla
 | Kind               | Description                                                                  |
 |--------------------|------------------------------------------------------------------------------|
 | `timeout`          | Upstream did not respond within the configured timeout                       |
-| `connection`       | Failed to establish a connection to the upstream                             |
+| `connection`       | Failed to establish a connection to the upstream (includes TLS handshake failures) |
 | `bad_status`       | Upstream returned HTTP 5xx                                                   |
 | `read_error`       | Connection was closed while reading the response body                        |
 | `body_too_large`   | Response body exceeded `max_response_body_size`                              |
@@ -101,7 +102,7 @@ kono → [OTLP HTTP] → OTel Collector → [remote_write] → Prometheus ← Gr
 The OTel Collector receives metrics from kono, transforms them, and pushes to Prometheus via `remote_write`. Prometheus
 must be started with `--web.enable-remote-write-receiver`.
 
-When using `exporter: prometheus`, Prometheus scrapes kono directly — no Collector needed.
+When using `exporter: prometheus`, Prometheus scrapes kono directly — no Collector needed. Point the scrape target at the admin port (`server.admin_port`).
 
 ### Recommended Panels
 ---

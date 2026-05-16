@@ -13,6 +13,13 @@ Kono uses a single declarative YAML configuration file.
 Only YAML is supported. JSON and TOML are not supported to reduce complexity and avoid inconsistencies.
 :::
 
+The top-level structure splits responsibilities into focused sections:
+
+- **`server`** — the data port that serves API traffic
+- **`admin`** — a separate port for health probes, metrics, and pprof
+- **`observability`** — metrics and tracing instrumentation
+- **`routing`** — flows, upstreams, and rate limiting
+
 ## Root
 ---
 
@@ -29,17 +36,125 @@ debug: false
 ## Server
 ---
 
+The data port serves API traffic. Optionally protected by TLS or mTLS. The admin port and observability stack are configured in separate top-level sections — see [Admin](#admin) and [Observability](#observability).
+
 ```yaml
 gateway:
   server:
     port: 7805
     timeout: 20s
-    pprof:
+    header_timeout: 5s
+    tls:
       enabled: true
-      port: 6060
+      cert_file: /etc/kono/server.crt
+      key_file:  /etc/kono/server.key
+      min_version: "1.2"
+      client_auth: require
+      client_ca_file: /etc/kono/client-ca.crt
+```
+
+| Field | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `port` | int | ✅ | — | Data port for API traffic |
+| `timeout` | duration | | `5s` | Read and write timeout for the data port |
+| `header_timeout` | duration | | `5s` | Maximum time to read request headers. Defends against Slowloris-style attacks |
+| `tls.enabled` | bool | | `false` | Enable TLS on the data port |
+| `tls.cert_file` | string | if enabled | — | Path to the server certificate (PEM) |
+| `tls.key_file` | string | if enabled | — | Path to the server private key (PEM) |
+| `tls.min_version` | string | | `1.2` | Minimum TLS version: `1.2` or `1.3` |
+| `tls.client_auth` | string | | `none` | Client certificate policy: `none`, `optional`, or `require` |
+| `tls.client_ca_file` | string | if not `none` | — | CA bundle used to verify client certificates |
+
+**Timeout nuance:** `timeout` applies per request to reading the body and writing the response. For passthrough flows with long-lived connections (SSE, chunked transfer), set a high value or rely on upstream-side timeouts. Admin-side timeouts are configured independently — see [Admin](#admin).
+
+**header_timeout nuance:** unlike `timeout`, this only covers reading request headers. It primarily protects against Slowloris attacks, which open many connections and dribble headers slowly to exhaust the server. The admin port has its own `header_timeout` field.
+
+**TLS nuance:** `client_auth: require` rejects any TLS connection that does not present a valid client certificate signed by `client_ca_file`. `optional` accepts connections without a certificate but validates any certificate that is presented. `none` disables client authentication entirely. The same `client_ca_file` is used in both `require` and `optional` modes.
+
+**TLS version nuance:** TLS 1.0 and 1.1 are intentionally not selectable — both are deprecated by RFC 8996 and disabled in modern clients.
+
+## Admin
+---
+
+Kono runs admin endpoints on a separate listener: health probes, metrics (when the Prometheus exporter is used), and pprof. The admin port binds to `127.0.0.1` by default and is **never** TLS-terminated.
+
+This separation is intentional: it lets you put strict client-certificate requirements on the data port without breaking Prometheus scraping or Kubernetes probes, which would otherwise need to be issued client certificates as well.
+
+```yaml
+gateway:
+  admin:
+    port: 9090
+    bind_addr: 127.0.0.1
+    timeout: 5m
+    header_timeout: 5s
+    enable_pprof: true
+```
+
+| Field | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `port` | int | ✅ | — | Admin port. Must differ from `server.port` |
+| `bind_addr` | string | | `127.0.0.1` | Bind address for the admin port. Use `0.0.0.0` only when Prometheus runs outside the pod network |
+| `timeout` | duration | | `5m` | Read and write timeout for the admin port. Generous default accommodates long pprof captures |
+| `header_timeout` | duration | | `5s` | Maximum time to read request headers on the admin port |
+| `enable_pprof` | bool | | `false` | Expose Go pprof endpoints under `/debug/pprof/` |
+
+**Bind address nuance:** binding to `127.0.0.1` means admin endpoints are reachable only from within the container/pod. kubelet probes, in-cluster Prometheus, and local pprof clients all work fine — they share the network namespace. If you need to scrape from outside (e.g. external Prometheus), set `bind_addr: 0.0.0.0` deliberately and ensure your network policy treats this port as internal.
+
+**Timeout nuance:** the 5-minute default is sized for `pprof.Profile` and `pprof.Trace`, which hold the connection open for the entire sampling duration (default 30s, but often longer for production diagnostics). Health probes and metrics scrapes complete in milliseconds, so the upper bound rarely matters in practice. If you need longer captures, bump this value.
+
+**pprof nuance:** pprof endpoints live on the admin port at `/debug/pprof/`, `/debug/pprof/cmdline`, `/debug/pprof/profile`, `/debug/pprof/symbol`, and `/debug/pprof/trace`. Because admin binds to localhost by default, pprof is reachable only from inside the container — exactly what you want for production diagnostics.
+
+## Health & Readiness
+---
+
+Kono exposes two probe endpoints on the admin port:
+
+| Endpoint | Purpose | Returns |
+|---|---|---|
+| `GET /__health` | Liveness probe | Always `200 OK` while the process can serve HTTP |
+| `GET /__ready` | Readiness probe | `200 OK` when ready to receive traffic, `503 Service Unavailable` during shutdown |
+
+Both endpoints return `application/json` and require no configuration.
+
+**Liveness vs readiness nuance:** `/__health` is meant for *liveness* — its only job is to confirm the process is alive. It does not check dependencies, because a failing dependency does not get better by restarting the gateway. `/__ready` is meant for *readiness* — its job is to gate inbound traffic. During graceful shutdown, `/__ready` returns `503` *before* the data port stops accepting connections, giving Kubernetes time to remove the pod from the service endpoints. This prevents in-flight requests from being dropped during rolling deployments.
+
+**Kubernetes example:**
+
+```yaml
+livenessProbe:
+  httpGet:
+    path: /__health
+    port: 9090
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /__ready
+    port: 9090
+  initialDelaySeconds: 1
+  periodSeconds: 2
+```
+
+## Observability
+---
+
+Metrics and tracing are configured under a single `observability` section. Both are independently enableable.
+
+```yaml
+gateway:
+  observability:
     metrics:
       enabled: true
+      exporter: prometheus
+      otlp:
+        endpoint: otel-collector:4318
+        insecure: true
+        interval: 10s
+    tracing:
+      enabled: true
       exporter: otlp
+      sampling_ratio: 1.0
       otlp:
         endpoint: otel-collector:4318
         insecure: true
@@ -48,22 +163,24 @@ gateway:
 
 | Field | Type | Required | Default | Description |
 |---|---|---|---|---|
-| `port` | int | ✅ | — | HTTP port the gateway listens on |
-| `timeout` | duration | | `5s` | Read and write timeout applied to all incoming requests |
-| `pprof.enabled` | bool | | `false` | Enable Go pprof profiling server |
-| `pprof.port` | int | if enabled | — | Port for the pprof server |
 | `metrics.enabled` | bool | | `false` | Enable metrics instrumentation |
 | `metrics.exporter` | string | if enabled | — | `prometheus` or `otlp` |
 | `metrics.otlp.endpoint` | string | if otlp | — | OTLP HTTP endpoint (e.g. `otel-collector:4318`) |
 | `metrics.otlp.insecure` | bool | | `false` | Disable TLS for the OTLP connection |
-| `metrics.otlp.interval` | duration | | `60s` | How often metrics are pushed to the OTLP endpoint |
+| `metrics.otlp.interval` | duration | | `60s` | Push interval for OTLP metrics |
+| `tracing.enabled` | bool | | `false` | Enable trace export |
+| `tracing.exporter` | string | if enabled | — | `otlp` (only OTLP is supported) |
+| `tracing.sampling_ratio` | float | | `1.0` | Fraction of traces to sample, between `0` and `1` |
+| `tracing.otlp.endpoint` | string | if enabled | — | OTLP HTTP endpoint for trace export |
+| `tracing.otlp.insecure` | bool | | `false` | Disable TLS for the OTLP connection |
+| `tracing.otlp.interval` | duration | | `60s` | Batch span export interval |
 
-**Timeout nuance:** `timeout` applies to both reading the request body and writing the response. For passthrough flows with long-lived connections (SSE, chunked transfer), set a high value or rely on upstream-side timeout management, since the gateway timeout will terminate the connection.
+**Metrics nuance:** with `exporter: prometheus`, the `/metrics` endpoint is served on the **admin port**, not the data port. This means Prometheus does not need a client certificate even when the data port enforces mTLS. With `exporter: otlp`, no endpoint is exposed — metrics are pushed on the configured interval. See the [Metrics](metrics) page for available metrics and Grafana setup.
 
-**pprof nuance:** the pprof server binds only to `localhost` — it is not accessible externally regardless of network configuration.
+**Sampling ratio nuance:** `sampling_ratio: 1.0` exports every trace, which is fine for low-traffic services and 
+indispensable during debugging, but expensive at scale. For high-RPS production deployments consider `0.01` to `0.1` (1-10% sampling). Span data volume scales linearly with this value.
 
-**Metrics nuance:** with `exporter: prometheus`, a `/metrics` endpoint is exposed on the same port as the gateway. 
-With `exporter: otlp`, no endpoint is exposed — metrics are pushed on the configured interval. See the [Metrics](metrics) page for available metrics and Grafana setup.
+**Trace propagation nuance:** Kono installs the standard W3C Trace Context propagator unconditionally — even when `tracing.enabled: false`. Incoming `traceparent` headers are extracted and propagated to upstreams regardless of whether Kono itself exports spans. This preserves distributed tracing context across deployments that haven't enabled the OTLP exporter yet.
 
 ## Routing
 ---
@@ -102,7 +219,7 @@ A flow defines how an incoming request is matched, processed, and dispatched to 
 flows:
   - path: /api/v1/users/{user_id}
     method: GET
-    max_parallel_upstreams: 10
+    parallel_upstreams: 10
     aggregation:
       strategy: merge
       best_effort: true
@@ -133,9 +250,9 @@ flows:
 | `method` | string | ✅ | — | HTTP method: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, `OPTIONS` |
 | `passthrough` | bool | | `false` | Enable unbuffered streaming proxy mode. See [Passthrough](#passthrough) |
 | `aggregation` | object | if not passthrough | — | Aggregation configuration. Not required when `passthrough: true` |
-| `max_parallel_upstreams` | int | | `2 × NumCPU` | Maximum number of upstream calls dispatched concurrently for this flow |
+| `parallel_upstreams` | int | | `2 × NumCPU` | Maximum number of upstream calls dispatched concurrently for this flow |
 
-**max_parallel_upstreams nuance:** this is a per-request semaphore, not a global connection pool. If a flow has 5 upstreams and `max_parallel_upstreams: 3`, the first 3 upstream calls are dispatched immediately; the remaining 2 wait until a slot is released. The gateway blocks until all upstreams return or the request context is cancelled.
+**parallel_upstreams nuance:** this is a per-request semaphore, not a global connection pool. If a flow has 5 upstreams and `parallel_upstreams: 3`, the first 3 upstream calls are dispatched immediately; the remaining 2 wait until a slot is released. The gateway blocks until all upstreams return or the request context is cancelled.
 
 ### Aggregation
 ---
@@ -190,8 +307,8 @@ When `passthrough: true`, the flow proxies the request directly to a single upst
 upstreams:
   - name: users
     hosts:
-      - http://user-service-1.local
-      - http://user-service-2.local
+      - https://user-service-1.internal
+      - https://user-service-2.internal
     path: /v1/users/{user_id}
     method: GET
     timeout: 3s
@@ -202,6 +319,13 @@ upstreams:
       max_idle_conns: 100
       max_idle_conns_per_host: 50
       idle_conn_timeout: 90s
+    tls:
+      enabled: true
+      cert_file: /etc/kono/clients/users.crt
+      key_file:  /etc/kono/clients/users.key
+      ca_file:   /etc/kono/internal-ca.crt
+      server_name: user-service.internal
+      min_version: "1.2"
     policy:
       ...
 ```
@@ -227,6 +351,31 @@ upstreams:
 **timeout nuance:** `timeout` applies per attempt. With `retry.max_retries: 3` and `timeout: 2s`, the worst-case total time before the request fails is `3 × 2s = 6s` (plus backoff delay). Set the flow-level `server.timeout` high enough to accommodate the full retry budget.
 
 **method nuance:** request body is only forwarded for `POST`, `PUT`, and `PATCH`. For other methods the body is discarded regardless of the incoming request.
+
+### Upstream TLS
+---
+
+When an upstream uses an HTTPS host, Kono establishes a TLS connection using the system root CAs by default — no configuration needed for public HTTPS endpoints. The `tls:` block is required only when you need to override that default, typically because:
+
+- The upstream uses a private or self-signed CA (set `ca_file`)
+- The upstream requires mutual TLS (set `cert_file` and `key_file`)
+- You need to pin the SNI hostname (set `server_name`) because the upstream is addressed by IP
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `tls.enabled` | bool | `false` | Apply TLS overrides for this upstream. When omitted or `false`, system defaults are used |
+| `tls.cert_file` | string | — | Client certificate for mTLS. Must be set together with `key_file` |
+| `tls.key_file` | string | — | Client private key for mTLS. Must be set together with `cert_file` |
+| `tls.ca_file` | string | — | Custom CA bundle for verifying the upstream certificate. Falls back to system roots if omitted |
+| `tls.server_name` | string | — | Override SNI / hostname verification. Useful when `hosts` contains IPs |
+| `tls.insecure_skip_verify` | bool | `false` | Disable certificate verification. **Do not use in production** |
+| `tls.min_version` | string | `1.2` | Minimum TLS version: `1.2` or `1.3` |
+
+**mTLS nuance:** `cert_file` and `key_file` must either both be set (enabling mTLS) or both be empty (disabling it). Setting only one is a validation error.
+
+**server_name nuance:** by default, Go derives SNI from the URL host. If your `hosts` are IP addresses (or DNS names that don't match the certificate's SAN), set `server_name` to the value the upstream certificate is actually issued for.
+
+**insecure_skip_verify nuance:** when enabled, Kono logs a loud warning on startup for every upstream that uses this flag. It is a deliberate escape hatch for local development or initial migration, not a production setting. Treat any occurrence of this in production logs as a finding to remediate.
 
 ## Upstream Policy
 ---

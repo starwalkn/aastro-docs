@@ -1,6 +1,3 @@
-// Kono — Aurora theme
-// Drop into: src/components/HomepageFeatures/index.js
-
 import clsx from 'clsx';
 import styles from './styles.module.css';
 import {Highlight} from 'prism-react-renderer';
@@ -69,7 +66,6 @@ func (p *Plugin) Execute(ctx sdk.Context) error {
     },
 ];
 
-/* Light Aurora prism theme — dark navy text on the glass card */
 const auroraTheme = {
     plain: {color: '#041E42', backgroundColor: 'transparent'},
     styles: [

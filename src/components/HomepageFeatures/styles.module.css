@@ -1,6 +1,3 @@
-/* Kono — Aurora theme
-   Drop into: src/components/HomepageFeatures/styles.module.css */
-
 .features {
   background: transparent;
   padding: 4rem 0 5rem;
@@ -74,9 +71,6 @@
   font-size: 1.02rem;
 }
 
-/* ============================================================
-   Glass code card (replaces the dark navy terminal)
-   ============================================================ */
 .terminal {
   background: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(14px) saturate(180%);
@@ -121,9 +115,6 @@
   overflow-x: auto;
 }
 
-/* ============================================================
-   Responsive
-   ============================================================ */
 @media screen and (max-width: 996px) {
   .featureRow {
     grid-template-columns: 1fr;

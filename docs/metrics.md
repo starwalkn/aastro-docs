@@ -14,7 +14,7 @@ Kono uses [OpenTelemetry](https://opentelemetry.io/) for instrumentation. Metric
 
 ```yaml
 gateway:
-  server:
+  observability:
     metrics:
       enabled: true
       exporter: prometheus  # or: otlp

@@ -16,7 +16,7 @@ kono stays transparent for distributed trace context even with tracing turned of
 
 ```yaml
 gateway:
-  server:
+  observability:
     tracing:
       enabled: true
       exporter: otlp
@@ -244,7 +244,7 @@ service:
 gateway:
   service:
     name: kono
-  server:
+  observability:
     tracing:
       enabled: true
       exporter: otlp

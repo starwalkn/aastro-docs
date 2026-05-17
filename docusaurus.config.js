@@ -41,7 +41,7 @@ const coldarkCold = {
 const config = {
     title: 'Route. Aggregate. Extend.',
     tagline: 'Kono is a lightweight API Gateway in Go — parallel fan-out, flexible aggregation, and zero configuration magic.',
-    favicon: 'img/rabbit-origami-paper.svg',
+    favicon: 'img/rabbt.svg',
 
     future: {
         v4: true,
@@ -97,8 +97,8 @@ const config = {
             navbar: {
                 title: 'Kono',
                 logo: {
-                    alt: 'Rabbit Origami Paper',
-                    src: 'img/rabbit-origami-paper.svg',
+                    alt: 'Rabbit',
+                    src: 'img/rabbt.svg',
                 },
                 items: [
                     {
@@ -122,10 +122,10 @@ const config = {
             footer: {
                 style: 'dark',
                 logo: {
-                    alt: 'Rabbit Origami Paper',
-                    src: 'img/rabbit-origami-paper.svg',
-                    width: 70,
-                    height: 70,
+                    alt: 'Rabbit',
+                    src: 'img/rabbt-dark.svg',
+                    width: 120,
+                    height: 120,
                     href: 'https://github.com/starwalkn/kono',
                 },
                 links: [

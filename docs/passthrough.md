@@ -51,7 +51,7 @@ The passthrough pipeline differs from the standard flow in several ways:
 
 **Hop-by-hop headers stripped.** `Connection`, `Transfer-Encoding`, `Keep-Alive`, `TE`, `Upgrade`, and other hop-by-hop headers are removed from the upstream response before forwarding to the client. All other upstream headers — including `Content-Type`, `Cache-Control`, and `X-Accel-Buffering` — are forwarded verbatim.
 
-**Double-write protection.** A `trackingWriter` wrapper tracks whether `WriteHeader` or `Write` have already been called. If the upstream errors _after_ partially writing the response, Kono skips the 502 error response — headers are already sent and the connection state cannot be rolled back.
+**Double-write protection.** A `trackingWriter` wrapper tracks whether `WriteHeader` or `Write` have already been called. If the upstream errors _after_ partially writing the response, Aastro skips the 502 error response — headers are already sent and the connection state cannot be rolled back.
 
 ## SSE-Specific Considerations
 ---
@@ -65,13 +65,13 @@ Cache-Control: no-cache
 
 `Cache-Control: no-cache` signals to intermediate proxies (nginx, CDN layers) that they should not buffer the response. Without it, some proxies will accumulate the body before forwarding, breaking the streaming behaviour entirely.
 
-If kono runs behind nginx, the upstream should also set:
+If aastro runs behind nginx, the upstream should also set:
 
 ```
 X-Accel-Buffering: no
 ```
 
-This disables nginx's proxy buffer for the connection. Kono forwards this header unchanged.
+This disables nginx's proxy buffer for the connection. Aastro forwards this header unchanged.
 
 **Reconnection support.** When an `EventSource` connection is dropped, browsers automatically reconnect and include the `Last-Event-ID` header with the ID of the last received event. To support seamless resumption, forward this header to the upstream:
 

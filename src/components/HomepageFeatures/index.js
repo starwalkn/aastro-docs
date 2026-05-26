@@ -42,7 +42,7 @@ const features = [
         description: 'Hook into request and response phases using dynamic .so plugins — modify headers, transform responses, validate tokens, or short-circuit requests.',
         code: `package main
 
-import "github.com/starwalkn/kono/sdk"
+import "github.com/starwalkn/aastro/sdk"
 
 type Plugin struct{}
 

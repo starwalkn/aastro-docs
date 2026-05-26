@@ -1,5 +1,5 @@
 {
-  "name": "konodocs",
+  "name": "aastrodocs",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -14,18 +14,14 @@
     "write-heading-ids": "docusaurus write-heading-ids"
   },
   "dependencies": {
-    "@docusaurus/core": "3.9.2",
-    "@docusaurus/preset-classic": "3.9.2",
+    "@docusaurus/core": "^3.10.1",
+    "@docusaurus/faster": "^3.10.1",
+    "@docusaurus/preset-classic": "^3.10.1",
     "@docusaurus/theme-mermaid": "^3.9.2",
     "@easyops-cn/docusaurus-search-local": "^0.55.1",
-    "@fontsource/coustard": "^5.2.9",
-    "@fontsource/dm-mono": "^5.2.7",
+    "@fontsource/fugaz-one": "^5.2.7",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/jetbrains-mono": "^5.2.8",
-    "@fontsource/monaspace-neon": "^5.2.5",
-    "@fontsource/overpass-mono": "^5.2.8",
-    "@fontsource/roboto-mono": "^5.2.8",
-    "@fontsource/ubuntu-sans-mono": "^5.2.10",
     "@mdx-js/react": "^3.0.0",
     "clsx": "^2.0.0",
     "prism-react-renderer": "^2.3.0",

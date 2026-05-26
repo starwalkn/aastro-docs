@@ -1,13 +1,13 @@
 ---
 id: builtins
 title: Built-in Plugins & Middlewares
-description: Reference for all built-in plugins and middlewares shipped with Kono
+description: Reference for all built-in plugins and middlewares shipped with Aastro
 slug: /builtins
 ---
 
 # Built-in Plugins & Middlewares
 
-Kono ships with a set of ready-to-use plugins and middlewares. They are available without any additional installation — set `source: builtin` in the flow configuration.
+Aastro ships with a set of ready-to-use plugins and middlewares. They are available without any additional installation — set `source: builtin` in the flow configuration.
 
 ---
 

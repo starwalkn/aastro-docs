@@ -7,7 +7,7 @@ slug: /response-format
 
 # Response Format
 
-Every response from Kono follows a consistent JSON envelope — whether the request succeeded, partially succeeded, or failed entirely.
+Every response from Aastro follows a consistent JSON envelope — whether the request succeeded, partially succeeded, or failed entirely.
 
 ```json
 {

@@ -1,4 +1,4 @@
-// Kono — Aurora homepage
+// Aastro — Aurora homepage
 // Drop into: src/pages/index.js
 //
 // Note: this replaces the default Docusaurus tutorial homepage.
@@ -16,9 +16,9 @@ function ReleaseBadge() {
     return (
         <Link
             className="hero-badge"
-            href="https://github.com/starwalkn/kono/releases">
+            href="https://github.com/starwalkn/aastro/releases">
             <span className="hero-badge__sparkle">✦</span>
-            <span><strong>0.4.0</strong>&nbsp;just released</span>
+            <span><strong>0.5.0</strong>&nbsp;just released</span>
             <span className="hero-badge__sep">—</span>
             <span>see what's new</span>
             <span className="hero-badge__arrow">→</span>
@@ -44,7 +44,7 @@ function HomepageHeader() {
                     </Link>
                     <Link
                         className="button button--secondary button--lg"
-                        href="https://github.com/starwalkn/kono">
+                        href="https://github.com/starwalkn/aastro">
                         GitHub
                     </Link>
                 </div>

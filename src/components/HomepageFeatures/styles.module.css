@@ -33,9 +33,9 @@
 }
 
 .featureTitle {
-  font-family: Coustard, sans-serif;
+  font-family: var(--aastro-font-sans);
   font-weight: 900;
-  font-size: 2.5rem;
+  font-size: 2.9rem;
   color: var(--ifm-heading-color);
   letter-spacing: -0.02em;
   line-height: 1.15;
@@ -68,7 +68,7 @@
   line-height: 1.75;
   margin: 0;
   font-weight: 400;
-  font-size: 1.02rem;
+  font-size: 1.12rem;
 }
 
 .terminal {
@@ -107,7 +107,7 @@
   margin: 0;
   padding: 1.25rem 1.5rem;
   font-family: "JetBrains Mono", monospace;
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   line-height: 1.75;
   color: #041E42;
   background: transparent !important;

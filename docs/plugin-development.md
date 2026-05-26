@@ -1,13 +1,13 @@
 ---
 id: plugin-development
 title: Plugin & Middleware Development
-description: How to write custom plugins and middlewares for Kono
+description: How to write custom plugins and middlewares for Aastro
 slug: /plugin-development
 ---
 
 # Plugin & Middleware Development
 
-Kono can be extended with custom plugins and middlewares compiled as Go shared objects (`.so`). Both use the same loading mechanism — the difference is when and how they execute.
+Aastro can be extended with custom plugins and middlewares compiled as Go shared objects (`.so`). Both use the same loading mechanism — the difference is when and how they execute.
 
 - **Plugin** — invoked at a specific phase in the request lifecycle (before scatter or after aggregation). Works with the gateway's `sdk.Context`.
 - **Middleware** — wraps the entire flow handler as a standard `http.Handler`. Executes for every request regardless of upstream results.
@@ -17,7 +17,7 @@ Kono can be extended with custom plugins and middlewares compiled as Go shared o
 
 - Go **1.25.4**
 - The plugin must be compiled with the **exact same Go version** as the gateway binary. A mismatch causes a panic at startup.
-- Import `github.com/starwalkn/kono/sdk` — this is the only dependency required.
+- Import `github.com/starwalkn/aastro/sdk` — this is the only dependency required.
 
 ## Writing a Plugin
 ---
@@ -47,7 +47,7 @@ type Plugin interface {
 package main
 
 import (
-    "github.com/starwalkn/kono/sdk"
+    "github.com/starwalkn/aastro/sdk"
 )
 
 type requestIDPlugin struct{}
@@ -72,7 +72,7 @@ func (p *requestIDPlugin) Type() sdk.PluginType {
 }
 
 func (p *requestIDPlugin) Execute(ctx sdk.Context) error {
-    ctx.Request().Header.Set("X-Gateway", "kono")
+    ctx.Request().Header.Set("X-Gateway", "aastro")
     return nil
 }
 ```
@@ -90,7 +90,7 @@ import (
     "io"
     "net/http"
 
-    "github.com/starwalkn/kono/sdk"
+    "github.com/starwalkn/aastro/sdk"
 )
 
 type wrapPlugin struct{}
@@ -175,7 +175,7 @@ type Closer interface {
 }
 ```
 
-Kono calls `Close()` on shutdown for any middleware that implements it.
+Aastro calls `Close()` on shutdown for any middleware that implements it.
 
 ### Example: simple logger middleware
 ---
@@ -188,7 +188,7 @@ import (
     "net/http"
     "time"
 
-    "github.com/starwalkn/kono/sdk"
+    "github.com/starwalkn/aastro/sdk"
 )
 
 type loggerMiddleware struct {
@@ -234,7 +234,7 @@ go build -buildmode=plugin -o myplugin.so ./myplugin
 go build -buildmode=plugin -o mymiddleware.so ./mymiddleware
 ```
 
-The exported entry point must be named exactly `NewPlugin` for plugins and `NewMiddleware` for middlewares. Kono looks up these symbols by name at load time.
+The exported entry point must be named exactly `NewPlugin` for plugins and `NewMiddleware` for middlewares. Aastro looks up these symbols by name at load time.
 
 :::info
 `-buildmode=plugin` is only supported on Linux and macOS. Windows is not supported.
@@ -247,21 +247,21 @@ A typical custom plugin repository looks like this:
 
 ```
 myplugin/
-├── go.mod           # must use the same Go version as Kono
+├── go.mod           # must use the same Go version as Aastro
 ├── main.go          # package main, exports NewPlugin()
 └── Makefile
 ```
 
 `go.mod` must declare `package main` is fine — the binary is never run directly.
 
-The `go.mod` should reference the same `github.com/starwalkn/kono/sdk` version as the gateway:
+The `go.mod` should reference the same `github.com/starwalkn/aastro/sdk` version as the gateway:
 
 ```go
 module github.com/yourname/myplugin
 
 go 1.25.4
 
-require github.com/starwalkn/kono/sdk v0.3.0
+require github.com/starwalkn/aastro/sdk v0.3.0
 ```
 
 ## Registering in Configuration
@@ -274,13 +274,13 @@ flows:
     plugins:
       - name: add-header       # matches Info().Name
         source: file
-        path: /etc/kono/plugins/
+        path: /etc/aastro/plugins/
         config:
           some_key: some_value
     middlewares:
       - name: simple-logger
         source: file
-        path: /etc/kono/middlewares/
+        path: /etc/aastro/middlewares/
         config:
           enabled: true
     aggregation:
@@ -289,7 +289,7 @@ flows:
       - ...
 ```
 
-The `path` field points to the **directory** containing the `.so` file. Kono resolves the full path as `{path}/{name}.so`.
+The `path` field points to the **directory** containing the `.so` file. Aastro resolves the full path as `{path}/{name}.so`.
 
 ## Execution Order
 ---

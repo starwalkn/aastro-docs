@@ -17,44 +17,26 @@ slug: /getting-started
 ---
 
 ```bash
-docker pull starwalkn/kono:latest
+docker pull starwalkn/aastro:latest
 
 docker run \
   -p 7805:7805 \
-  -v $(pwd)/kono.yaml:/app/kono.yaml \
-  -e KONO_CONFIG=/app/kono.yaml \
-  starwalkn/kono:latest
+  -v $(pwd)/config.yaml:/etc/aastro/config.yaml \
+  -e AASTRO_CONFIG=/etc/aastro/config.yaml \
+  starwalkn/aastro:latest
 ```
 
 ## Build from Source
 ---
 
 ```bash
-git clone https://github.com/starwalkn/kono.git
-cd kono
+git clone https://github.com/starwalkn/aastro.git
+cd aastro
 
 make all GOOS=linux GOARCH=amd64
 
-./bin/kono serve
+./bin/aastro -c /path/to/config.yaml
 ```
-
-## CLI Commands
----
-
-| Command | Description |
-|---|---|
-| `kono serve` | Start the gateway |
-| `kono validate` | Validate the configuration file without starting |
-| `kono viz` | Visualize flow configuration as a diagram |
-
-## Configuration Path Resolution
----
-
-Kono resolves the configuration file in this order:
-
-1. `--config` flag: `kono --config /etc/kono/config.yaml serve`
-2. `KONO_CONFIG` environment variable
-3. Default path: `/etc/kono/config.yaml`
 
 ## Minimal Configuration
 ---
@@ -85,7 +67,7 @@ gateway:
 Start the gateway:
 
 ```bash
-kono serve
+aastro -c /path/to/config.yaml
 ```
 
 Send a request:
@@ -97,23 +79,11 @@ curl http://localhost:7805/api/hello
 ## Health Check
 ---
 
-Kono exposes a built-in health endpoint. The `__` prefix avoids conflicts with user-defined flow paths.
+Aastro exposes a built-in health endpoint. The `__` prefix avoids conflicts with user-defined flow paths.
 
 ```bash
 curl http://localhost:7805/__health
 # → 200 OK
 ```
-
-## Validate Configuration
----
-
-```bash
-kono validate
-
-# or with explicit path
-kono --config /etc/kono/config.yaml validate
-```
-
-Validation checks schema, required fields, unknown aggregation strategies, upstream policy constraints, and path parameter consistency between flows and upstreams. Errors are reported with human-readable field paths.
 
 ---

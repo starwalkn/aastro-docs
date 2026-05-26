@@ -7,7 +7,7 @@ slug: /configuration
 
 # Configuration Reference
 
-Kono uses a single declarative YAML configuration file.
+Aastro uses a single declarative YAML configuration file.
 
 :::info
 Only YAML is supported. JSON and TOML are not supported to reduce complexity and avoid inconsistencies.
@@ -46,11 +46,11 @@ gateway:
     header_timeout: 5s
     tls:
       enabled: true
-      cert_file: /etc/kono/server.crt
-      key_file:  /etc/kono/server.key
+      cert_file: /etc/aastro/server.crt
+      key_file:  /etc/aastro/server.key
       min_version: "1.2"
       client_auth: require
-      client_ca_file: /etc/kono/client-ca.crt
+      client_ca_file: /etc/aastro/client-ca.crt
 ```
 
 | Field | Type | Required | Default | Description |
@@ -76,7 +76,7 @@ gateway:
 ## Admin
 ---
 
-Kono runs admin endpoints on a separate listener: health probes, metrics (when the Prometheus exporter is used), and pprof. The admin port binds to `127.0.0.1` by default and is **never** TLS-terminated.
+Aastro runs admin endpoints on a separate listener: health probes, metrics (when the Prometheus exporter is used), and pprof. The admin port binds to `127.0.0.1` by default and is **never** TLS-terminated.
 
 This separation is intentional: it lets you put strict client-certificate requirements on the data port without breaking Prometheus scraping or Kubernetes probes, which would otherwise need to be issued client certificates as well.
 
@@ -107,7 +107,7 @@ gateway:
 ## Health & Readiness
 ---
 
-Kono exposes two probe endpoints on the admin port:
+Aastro exposes two probe endpoints on the admin port:
 
 | Endpoint | Purpose | Returns |
 |---|---|---|
@@ -180,7 +180,7 @@ gateway:
 **Sampling ratio nuance:** `sampling_ratio: 1.0` exports every trace, which is fine for low-traffic services and 
 indispensable during debugging, but expensive at scale. For high-RPS production deployments consider `0.01` to `0.1` (1-10% sampling). Span data volume scales linearly with this value.
 
-**Trace propagation nuance:** Kono installs the standard W3C Trace Context propagator unconditionally — even when `tracing.enabled: false`. Incoming `traceparent` headers are extracted and propagated to upstreams regardless of whether Kono itself exports spans. This preserves distributed tracing context across deployments that haven't enabled the OTLP exporter yet.
+**Trace propagation nuance:** Aastro installs the standard W3C Trace Context propagator unconditionally — even when `tracing.enabled: false`. Incoming `traceparent` headers are extracted and propagated to upstreams regardless of whether Aastro itself exports spans. This preserves distributed tracing context across deployments that haven't enabled the OTLP exporter yet.
 
 ## Routing
 ---
@@ -206,7 +206,7 @@ gateway:
 | `rate_limiter.enabled` | bool | `false` | Enable per-IP rate limiting |
 | `rate_limiter.config` | map | — | Rate limiter configuration (`limit`, `window`) |
 
-**Trusted proxies nuance:** when a request arrives from an IP that is _not_ in `trusted_proxies`, Kono overwrites `X-Forwarded-For`, `X-Forwarded-Proto`, `X-Forwarded-Host`, `X-Forwarded-Port`, and `Forwarded` with values derived from the actual connection. When a request comes from a _trusted_ IP, Kono appends to the existing chain rather than overwriting — preserving the full proxy path. Leave this list empty if Kono is your outermost edge.
+**Trusted proxies nuance:** when a request arrives from an IP that is _not_ in `trusted_proxies`, Aastro overwrites `X-Forwarded-For`, `X-Forwarded-Proto`, `X-Forwarded-Host`, `X-Forwarded-Port`, and `Forwarded` with values derived from the actual connection. When a request comes from a _trusted_ IP, Aastro appends to the existing chain rather than overwriting — preserving the full proxy path. Leave this list empty if Aastro is your outermost edge.
 
 **Rate limiter nuance:** the limit is applied per client IP after trusted proxy resolution. The IP used for rate limiting is the same one extracted from `X-Forwarded-For` / `X-Real-IP` / `RemoteAddr`.
 
@@ -321,9 +321,9 @@ upstreams:
       idle_conn_timeout: 90s
     tls:
       enabled: true
-      cert_file: /etc/kono/clients/users.crt
-      key_file:  /etc/kono/clients/users.key
-      ca_file:   /etc/kono/internal-ca.crt
+      cert_file: /etc/aastro/clients/users.crt
+      key_file:  /etc/aastro/clients/users.key
+      ca_file:   /etc/aastro/internal-ca.crt
       server_name: user-service.internal
       min_version: "1.2"
     policy:
@@ -355,7 +355,7 @@ upstreams:
 ### Upstream TLS
 ---
 
-When an upstream uses an HTTPS host, Kono establishes a TLS connection using the system root CAs by default — no configuration needed for public HTTPS endpoints. The `tls:` block is required only when you need to override that default, typically because:
+When an upstream uses an HTTPS host, Aastro establishes a TLS connection using the system root CAs by default — no configuration needed for public HTTPS endpoints. The `tls:` block is required only when you need to override that default, typically because:
 
 - The upstream uses a private or self-signed CA (set `ca_file`)
 - The upstream requires mutual TLS (set `cert_file` and `key_file`)
@@ -375,7 +375,7 @@ When an upstream uses an HTTPS host, Kono establishes a TLS connection using the
 
 **server_name nuance:** by default, Go derives SNI from the URL host. If your `hosts` are IP addresses (or DNS names that don't match the certificate's SAN), set `server_name` to the value the upstream certificate is actually issued for.
 
-**insecure_skip_verify nuance:** when enabled, Kono logs a loud warning on startup for every upstream that uses this flag. It is a deliberate escape hatch for local development or initial migration, not a production setting. Treat any occurrence of this in production logs as a finding to remediate.
+**insecure_skip_verify nuance:** when enabled, Aastro logs a loud warning on startup for every upstream that uses this flag. It is a deliberate escape hatch for local development or initial migration, not a production setting. Treat any occurrence of this in production logs as a finding to remediate.
 
 ## Upstream Policy
 ---
@@ -414,7 +414,7 @@ policy:
 
 **allowed_status_codes nuance:** policy violations (wrong status code, empty body) are recorded _after_ the circuit breaker update. A misconfigured `allowed_status_codes` that rejects a healthy `200` response will not cause the circuit breaker to open — only true transport-level failures (timeout, connection error, 5xx) count toward the circuit breaker threshold.
 
-**circuit_breaker nuance:** the breaker has three states. **Closed** — requests pass through normally. **Open** — all requests are immediately rejected without contacting the upstream; the `circuit_open` error kind is recorded. **Half-open** — one probe request is allowed through; success closes the breaker, failure returns it to open. State is exposed via the `kono_circuit_breaker_state` metric: `0`=closed, `1`=open, `2`=half-open.
+**circuit_breaker nuance:** the breaker has three states. **Closed** — requests pass through normally. **Open** — all requests are immediately rejected without contacting the upstream; the `circuit_open` error kind is recorded. **Half-open** — one probe request is allowed through; success closes the breaker, failure returns it to open. State is exposed via the `aastro_circuit_breaker_state` metric: `0`=closed, `1`=open, `2`=half-open.
 
 **retry nuance:** retries only trigger when the response status matches `retry_on_statuses` _or_ when the upstream returns an error (connection failure, timeout). A successful response with an unexpected status code (caught by `allowed_status_codes`) does _not_ trigger a retry.
 
@@ -429,7 +429,7 @@ plugins:
     source: builtin
   - name: myplugin
     source: file
-    path: /etc/kono/plugins/
+    path: /etc/aastro/plugins/
     config:
       key: value
 ```
@@ -437,7 +437,7 @@ plugins:
 | Field | Type | Required | Default | Description |
 |---|---|---|---|---|
 | `name` | string | ✅ | — | Plugin identifier |
-| `source` | string | ✅ | — | `builtin` (included with Kono) or `file` (custom `.so`) |
+| `source` | string | ✅ | — | `builtin` (included with Aastro) or `file` (custom `.so`) |
 | `path` | string | if file | — | Directory containing the `.so` file |
 | `config` | map | | `{}` | Plugin-specific configuration passed at initialization |
 

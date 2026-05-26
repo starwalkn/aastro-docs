@@ -39,19 +39,18 @@ const coldarkCold = {
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-    title: 'Route. Aggregate. Extend.',
-    tagline: 'Kono is a lightweight API Gateway in Go — parallel fan-out, flexible aggregation, and zero configuration magic.',
+    title: 'Every request finds its way',
+    tagline: 'Aastro (Åstro) is a lightweight API Gateway in Go — parallel fan-out, flexible aggregation, and zero configuration magic.',
     favicon: 'img/rabbt.svg',
-
     future: {
         v4: true,
     },
 
     url: 'https://your-docusaurus-site.example.com',
-    baseUrl: '/konodocs',
+    baseUrl: '/aastrodocs',
 
     organizationName: 'starwalkn',
-    projectName: 'konodocs',
+    projectName: 'aastrodocs',
     trailingSlash: false,
 
     onBrokenLinks: 'throw',
@@ -95,7 +94,7 @@ const config = {
                 isCloseable: true,
             },
             navbar: {
-                title: 'Kono',
+                title: 'Aastro',
                 logo: {
                     alt: 'Rabbit',
                     src: 'img/rabbt.svg',
@@ -108,12 +107,12 @@ const config = {
                         position: 'left',
                     },
                     {
-                        href: 'https://github.com/starwalkn/kono/discussions',
+                        href: 'https://github.com/starwalkn/aastro/discussions',
                         label: 'Help',
                         position: 'left',
                     },
                     {
-                        href: 'https://github.com/starwalkn/kono',
+                        href: 'https://github.com/starwalkn/aastro',
                         className: 'header-github-link',
                         position: 'right',
                     },
@@ -126,7 +125,7 @@ const config = {
                     src: 'img/rabbt-dark.svg',
                     width: 120,
                     height: 120,
-                    href: 'https://github.com/starwalkn/kono',
+                    href: 'https://github.com/starwalkn/aastro',
                 },
                 links: [
                     {
@@ -143,11 +142,11 @@ const config = {
                         items: [
                             {
                                 label: 'GitHub Discussions',
-                                href: 'https://github.com/starwalkn/kono/discussions',
+                                href: 'https://github.com/starwalkn/aastro/discussions',
                             },
                             {
                                 label: 'GitHub Issues',
-                                href: 'https://github.com/starwalkn/kono/issues',
+                                href: 'https://github.com/starwalkn/aastro/issues',
                             },
                         ],
                     },
@@ -156,19 +155,19 @@ const config = {
                         items: [
                             {
                                 label: 'GitHub',
-                                href: 'https://github.com/starwalkn/kono',
+                                href: 'https://github.com/starwalkn/aastro',
                             },
                             {
                                 label: 'Releases',
-                                href: 'https://github.com/starwalkn/kono/releases',
+                                href: 'https://github.com/starwalkn/aastro/releases',
                             },
                             {
                                 label: 'pkg.go.dev',
-                                href: 'https://pkg.go.dev/github.com/starwalkn/kono',
+                                href: 'https://pkg.go.dev/github.com/starwalkn/aastro',
                             },
                             {
                                 label: 'Docker Hub',
-                                href: 'https://hub.docker.com/r/starwalkn/kono',
+                                href: 'https://hub.docker.com/r/starwalkn/aastro',
                             },
                         ],
                     },

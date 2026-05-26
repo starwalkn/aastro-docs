@@ -4,9 +4,6 @@
 @import '@fontsource/inter/800.css';
 @import '@fontsource/inter/900.css';
 
-@import '@fontsource/coustard/400.css';
-@import '@fontsource/coustard/900.css';
-
 @import '@fontsource/jetbrains-mono/500.css';
 @import '@fontsource/jetbrains-mono/700.css';
 
@@ -25,41 +22,41 @@
     --ifm-heading-color: #041E42;
     --ifm-font-color-base: #3D5A78;
 
-    --kono-border-subtle: rgba(221, 232, 244, 0.7);
+    --aastro-border-subtle: rgba(221, 232, 244, 0.7);
 
-    --kono-glass-bg: rgba(255, 255, 255, 0.62);
-    --kono-glass-border: rgba(221, 232, 244, 0.75);
-    --kono-glass-blur: blur(12px) saturate(180%);
-    --kono-glass-shadow: 0 12px 40px rgba(26, 111, 212, 0.12),
+    --aastro-glass-bg: rgba(255, 255, 255, 0.62);
+    --aastro-glass-border: rgba(221, 232, 244, 0.75);
+    --aastro-glass-blur: blur(12px) saturate(180%);
+    --aastro-glass-shadow: 0 12px 40px rgba(26, 111, 212, 0.12),
     0 4px 12px rgba(26, 111, 212, 0.06);
 
-    --kono-font-sans: Inter, sans-serif;
-    --kono-font-display: "Coustard", Georgia, "Times New Roman", serif;
-    --kono-font-mono: "JetBrains Mono", monospace;
-    --ifm-font-family-base: var(--kono-font-sans);
+    --aastro-font-sans: Inter, sans-serif;
+    --aastro-font-display: Inter, serif;
+    --aastro-font-mono: "JetBrains Mono", monospace;
+    --ifm-font-family-base: var(--aastro-font-sans);
 
-    --kono-weight-body: 400;
-    --kono-weight-link: 500;
-    --kono-weight-mono: 500;
-    --kono-weight-heading: 800;
+    --aastro-weight-body: 400;
+    --aastro-weight-link: 500;
+    --aastro-weight-mono: 500;
+    --aastro-weight-heading: 800;
 
-    --kono-size-hero: clamp(44px, 6vw, 72px);
-    --kono-size-h1: 2.8rem;
-    --kono-size-h2: 1.8rem;
-    --kono-size-body: 1.05rem;
-    --kono-size-code: 0.85em;
-    --kono-size-pre: 0.90em;
+    --aastro-size-hero: clamp(74px, 6vw, 72px);
+    --aastro-size-h1: 2.8rem;
+    --aastro-size-h2: 1.8rem;
+    --aastro-size-body: 1.05rem;
+    --aastro-size-code: 0.85em;
+    --aastro-size-pre: 0.90em;
 
-    --kono-h1-underline-offset: 18px;
-    --kono-h1-underline-thickness: 6px;
-    --kono-h1-padding-bottom: 1.8rem;
-    --kono-link-underline-thickness: 2px;
-    --kono-link-underline-offset: 3px;
+    --aastro-h1-underline-offset: 18px;
+    --aastro-h1-underline-thickness: 6px;
+    --aastro-h1-padding-bottom: 1.8rem;
+    --aastro-link-underline-thickness: 2px;
+    --aastro-link-underline-offset: 3px;
 
     --ifm-code-font-size: 95%;
     --ifm-code-background: #E0E8F2;
 
-    --ifm-hr-background-color: var(--kono-border-subtle);
+    --ifm-hr-background-color: var(--aastro-border-subtle);
     --ifm-hr-height: 2px;
     --ifm-hr-margin-vertical: 2rem;
     --ifm-hr-margin-horizontal: 2rem;
@@ -90,26 +87,26 @@ section[class*="features"] {
 .markdown h1,
 h2,
 h3 {
-    font-family: var(--kono-font-sans), serif;
-    font-weight: var(--kono-weight-heading);
+    font-family: var(--aastro-font-sans), serif;
+    font-weight: var(--aastro-weight-heading);
 }
 
 .markdown p {
-    font-size: var(--kono-size-body);
+    font-size: var(--aastro-size-body);
 }
 
 .markdown a {
-    font-weight: var(--kono-weight-link);
+    font-weight: var(--aastro-weight-link);
     text-decoration: underline;
-    text-decoration-thickness: var(--kono-link-underline-thickness);
-    text-underline-offset: var(--kono-link-underline-offset);
+    text-decoration-thickness: var(--aastro-link-underline-thickness);
+    text-underline-offset: var(--aastro-link-underline-offset);
 }
 
 .markdown h1 {
-    font-size: var(--kono-size-h1);
-    text-decoration: underline var(--ifm-color-primary) var(--kono-h1-underline-thickness);
-    text-underline-offset: var(--kono-h1-underline-offset);
-    padding-bottom: var(--kono-h1-padding-bottom);
+    font-size: var(--aastro-size-h1);
+    text-decoration: underline var(--ifm-color-primary) var(--aastro-h1-underline-thickness);
+    text-underline-offset: var(--aastro-h1-underline-offset);
+    padding-bottom: var(--aastro-h1-padding-bottom);
 }
 
 .markdown hr {
@@ -118,25 +115,26 @@ h3 {
 }
 
 h2 {
-    font-size: var(--kono-size-h2);
+    font-size: var(--aastro-size-h2);
 }
 
-.markdown :not(pre) > code {
+.markdown :not(pre) > code,
+.table-of-contents code {
     color: var(--ifm-heading-color);
     background-color: #dae7f4;
     border: none;
     padding: 0.15rem 0.4rem;
-    font-family: var(--kono-font-mono);
-    font-size: var(--kono-size-code);
-    font-weight: var(--kono-weight-mono);
+    font-family: var(--aastro-font-mono);
+    font-size: var(--aastro-size-code);
+    font-weight: var(--aastro-weight-mono);
 }
 
 .markdown pre code {
     border: none;
     padding: 0.80rem 0.8rem;
-    font-family: var(--kono-font-mono);
-    font-weight: var(--kono-weight-mono);
-    font-size: var(--kono-size-pre);
+    font-family: var(--aastro-font-mono);
+    font-weight: var(--aastro-weight-mono);
+    font-size: var(--aastro-size-pre);
 }
 
 .main-wrapper:has(.theme-doc-sidebar-container) {
@@ -150,8 +148,8 @@ h2 {
 
 .navbar {
     background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: var(--kono-glass-blur);
-    -webkit-backdrop-filter: var(--kono-glass-blur);
+    backdrop-filter: var(--aastro-glass-blur);
+    -webkit-backdrop-filter: var(--aastro-glass-blur);
     border-bottom: 1px solid rgba(221, 232, 244, 0.6);
     box-shadow: none;
 }
@@ -189,7 +187,7 @@ h2 {
     background: rgba(255, 255, 255, 0.55) url('data:image/svg+xml;utf8,<svg fill="%237A9AC0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" height="16px" width="16px"><path d="M6.02945,10.20327a4.17382,4.17382,0,1,1,4.17382-4.17382A4.15609,4.15609,0,0,1,6.02945,10.20327Zm9.69195,4.2199L10.8989,9.59979A5.88021,5.88021,0,0,0,12.058,6.02856,6.00467,6.00467,0,1,0,9.59979,10.8989l4.82338,4.82338a.89729.89729,0,0,0,1.29912,0,.89749.89749,0,0,0-.00087-1.29909Z"/></svg>') no-repeat 0.75rem center / 1rem 1rem;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    border: 1px solid var(--kono-glass-border);
+    border: 1px solid var(--aastro-glass-border);
     border-radius: 10px;
     color: var(--ifm-heading-color);
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
@@ -204,7 +202,7 @@ h2 {
 
 .navbar__search kbd {
     background: rgba(255, 255, 255, 0.7);
-    border: 1px solid var(--kono-glass-border);
+    border: 1px solid var(--aastro-glass-border);
     border-radius: 5px;
     color: #7A8BAD;
     font-size: 0.72rem;
@@ -228,7 +226,7 @@ h2 {
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(10px) saturate(180%);
     -webkit-backdrop-filter: blur(10px) saturate(180%);
-    border: 1px solid var(--kono-glass-border);
+    border: 1px solid var(--aastro-glass-border);
     border-radius: 999px;
     font-size: 0.82rem;
     font-weight: 500;
@@ -290,9 +288,9 @@ h2 {
 }
 
 .hero__title {
-    font-family: var(--kono-font-display);
+    font-family: var(--aastro-font-display);
     font-weight: 900;
-    font-size: var(--kono-size-hero);
+    font-size: var(--aastro-size-hero);
     letter-spacing: -0.015em;
     line-height: 1.18;
     margin: 0 0 1.5rem;
@@ -310,17 +308,17 @@ h2 {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: kono-hero-shimmer 9s linear infinite;
+    animation: aastro-hero-shimmer 9s linear infinite;
 }
 
-@keyframes kono-hero-shimmer {
+@keyframes aastro-hero-shimmer {
     0%   { background-position: 0% center; }
     100% { background-position: 200% center; }
 }
 
 .hero .hero__subtitle {
     color: #3D5A78;
-    font-size: 1.18rem;
+    font-size: 1.32rem;
     line-height: 1.65;
     max-width: 42rem;
     margin: 0 auto 2.5rem;
@@ -363,7 +361,7 @@ h2 {
     background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid var(--kono-glass-border);
+    border: 1px solid var(--aastro-glass-border);
     color: var(--ifm-heading-color);
     box-shadow:
             0 4px 14px rgba(26, 111, 212, 0.08),

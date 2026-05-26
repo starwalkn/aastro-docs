@@ -7,12 +7,12 @@ slug: /tracing
 
 # Tracing
 
-Kono uses [OpenTelemetry](https://opentelemetry.io/) for distributed tracing. Spans are exported via OTLP/HTTP to any
+Aastro uses [OpenTelemetry](https://opentelemetry.io/) for distributed tracing. Spans are exported via OTLP/HTTP to any
 OpenTelemetry-compatible backend — OTel Collector, Jaeger, Tempo, Datadog, Honeycomb.
 
 W3C `traceparent` and `tracestate` headers are propagated automatically: incoming traces are continued, outgoing
 requests to upstreams carry the trace context. The propagator is installed regardless of whether tracing is enabled, so
-kono stays transparent for distributed trace context even with tracing turned off.
+aastro stays transparent for distributed trace context even with tracing turned off.
 
 ```yaml
 gateway:
@@ -48,34 +48,34 @@ high-traffic services, the size limit dominates and the timeout rarely fires.
 A typical request to a fan-out flow produces this tree:
 
 ```
-kono.request                   [SpanKindServer]
-├── kono.plugin request-phase plugin
-├── kono.plugin ...
-├── kono.scatter
-│   ├── kono.upstream          [SpanKindClient]
-│   ├── kono.upstream          [SpanKindClient]
-│   └── kono.upstream          [SpanKindClient]
-└── kono.plugin response-phase plugin
+aastro.request                   [SpanKindServer]
+├── aastro.plugin request-phase plugin
+├── aastro.plugin ...
+├── aastro.scatter
+│   ├── aastro.upstream          [SpanKindClient]
+│   ├── aastro.upstream          [SpanKindClient]
+│   └── aastro.upstream          [SpanKindClient]
+└── aastro.plugin response-phase plugin
 ```
 
-Passthrough flows skip `kono.scatter` and have a single `kono.upstream` span:
+Passthrough flows skip `aastro.scatter` and have a single `aastro.upstream` span:
 
 ```
-kono.request                   [SpanKindServer]
-└── kono.upstream              [SpanKindClient, mode=passthrough]
+aastro.request                   [SpanKindServer]
+└── aastro.upstream              [SpanKindClient, mode=passthrough]
 ```
 
 | Span            | When opened                               | When closed                                  | Parent                                             |
 |-----------------|-------------------------------------------|----------------------------------------------|----------------------------------------------------|
-| `kono.request`  | Request enters `Router.ServeHTTP`         | Response written or rate-limit rejection     | Remote (from `traceparent`) or none                |
-| `kono.plugin`   | Before each plugin's `Execute`            | After plugin returns                         | `kono.request`                                     |
-| `kono.scatter`  | Beginning of scatter fan-out              | All upstream goroutines completed            | `kono.request`                                     |
-| `kono.upstream` | Beginning of upstream call (per upstream) | Upstream call returns, including all retries | `kono.scatter` (or `kono.request` for passthrough) |
+| `aastro.request`  | Request enters `Router.ServeHTTP`         | Response written or rate-limit rejection     | Remote (from `traceparent`) or none                |
+| `aastro.plugin`   | Before each plugin's `Execute`            | After plugin returns                         | `aastro.request`                                     |
+| `aastro.scatter`  | Beginning of scatter fan-out              | All upstream goroutines completed            | `aastro.request`                                     |
+| `aastro.upstream` | Beginning of upstream call (per upstream) | Upstream call returns, including all retries | `aastro.scatter` (or `aastro.request` for passthrough) |
 
 ## Span Attributes
 ---
 
-### `kono.request`
+### `aastro.request`
 
 | Attribute                  | Description                                                                         |
 |----------------------------|-------------------------------------------------------------------------------------|
@@ -83,10 +83,10 @@ kono.request                   [SpanKindServer]
 | `http.route`               | Matched flow path with parameter placeholders, e.g. `/users/{id}`                   |
 | `url.path`                 | Raw request path                                                                    |
 | `http.status_code`         | Final response status                                                               |
-| `kono.request.id`          | ULID identifying the request                                                        |
-| `kono.request.fingerprint` | 16-char hex hash of method, route template, header names, and query parameter names |
+| `aastro.request.id`          | ULID identifying the request                                                        |
+| `aastro.request.fingerprint` | 16-char hex hash of method, route template, header names, and query parameter names |
 
-### `kono.upstream`
+### `aastro.upstream`
 
 | Attribute                  | Description                                                   |
 |----------------------------|---------------------------------------------------------------|
@@ -94,42 +94,42 @@ kono.request                   [SpanKindServer]
 | `http.url`                 | Full upstream URL with parameters expanded                    |
 | `http.status_code`         | HTTP status returned by the upstream                          |
 | `server.address`           | Upstream host:port                                            |
-| `kono.upstream.name`       | Configured upstream name                                      |
-| `kono.upstream.host`       | Host selected by the load balancer                            |
-| `kono.upstream.wait_us`    | Microseconds spent waiting for the parallelism semaphore      |
-| `kono.upstream.error_kind` | Error classification on failure (see [Metrics](./metrics.md)) |
-| `kono.upstream.mode`       | `passthrough` for passthrough flows; absent otherwise         |
-| `kono.flow.path`           | Flow path the upstream was called from                        |
+| `aastro.upstream.name`       | Configured upstream name                                      |
+| `aastro.upstream.host`       | Host selected by the load balancer                            |
+| `aastro.upstream.wait_us`    | Microseconds spent waiting for the parallelism semaphore      |
+| `aastro.upstream.error_kind` | Error classification on failure (see [Metrics](./metrics.md)) |
+| `aastro.upstream.mode`       | `passthrough` for passthrough flows; absent otherwise         |
+| `aastro.flow.path`           | Flow path the upstream was called from                        |
 
-### `kono.scatter`
+### `aastro.scatter`
 
 | Attribute                   | Description                        |
 |-----------------------------|------------------------------------|
-| `kono.upstream.count`       | Number of upstreams in the scatter |
-| `kono.aggregation.strategy` | `merge`, `array`, or `namespace`   |
+| `aastro.upstream.count`       | Number of upstreams in the scatter |
+| `aastro.aggregation.strategy` | `merge`, `array`, or `namespace`   |
 
-### `kono.plugin`
+### `aastro.plugin`
 
 | Attribute          | Description             |
 |--------------------|-------------------------|
-| `kono.plugin.name` | Configured plugin name  |
-| `kono.plugin.type` | `request` or `response` |
+| `aastro.plugin.name` | Configured plugin name  |
+| `aastro.plugin.type` | `request` or `response` |
 
 ### Span Events
 
 | Event                | When recorded                                                                                                                                                                |
 |----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `semaphore.acquired` | Recorded on `kono.upstream` when the semaphore wait exceeded the configured threshold. Useful to visually distinguish wait time from actual upstream work in waterfall views |
+| `semaphore.acquired` | Recorded on `aastro.upstream` when the semaphore wait exceeded the configured threshold. Useful to visually distinguish wait time from actual upstream work in waterfall views |
 
 ## Resource Attributes
 ---
 
-Every exported span carries resource attributes describing the kono process. The same resource is attached to metrics,
+Every exported span carries resource attributes describing the aastro process. The same resource is attached to metrics,
 so traces and metrics from one process are correlated by `service.name` and `service.instance.id` in the backend.
 
 | Attribute                                          | Source                                              |
 |----------------------------------------------------|-----------------------------------------------------|
-| `service.name`                                     | `gateway.service.name` (default: `kono`)            |
+| `service.name`                                     | `gateway.service.name` (default: `aastro`)            |
 | `service.version`                                  | Build-time `-ldflags "-X main.version=…"` injection |
 | `host.name`, `process.pid`, `process.command_args` | Auto-detected at startup                            |
 | `telemetry.sdk.*`                                  | OTel SDK metadata                                   |
@@ -139,8 +139,8 @@ Additional attributes from the `OTEL_RESOURCE_ATTRIBUTES` environment variable a
 ## Sampling
 ---
 
-Sampling determines which traces are recorded. Kono uses a `ParentBased` sampler that respects the incoming
-`traceparent` flag — if an upstream service has already decided to sample a trace, kono honors that decision regardless
+Sampling determines which traces are recorded. Aastro uses a `ParentBased` sampler that respects the incoming
+`traceparent` flag — if an upstream service has already decided to sample a trace, aastro honors that decision regardless
 of `sampling_ratio`. Only **new root traces** (requests without an incoming `traceparent`) are subject to ratio-based
 sampling.
 
@@ -161,17 +161,17 @@ e.g. `0.05`) keep ingestion costs manageable while still providing statistical v
 ## Propagation
 ---
 
-Kono propagates W3C trace context bidirectionally:
+Aastro propagates W3C trace context bidirectionally:
 
 - **Inbound** — `traceparent` and `tracestate` headers from incoming requests are extracted into the request context.
-  The resulting `kono.request` span becomes a child of the upstream's span.
-- **Outbound** — when calling an upstream, kono injects the current trace context into the outgoing request's
-  `traceparent` header. If the upstream is OTel-instrumented, its handler will see kono's span as the parent.
+  The resulting `aastro.request` span becomes a child of the upstream's span.
+- **Outbound** — when calling an upstream, aastro injects the current trace context into the outgoing request's
+  `traceparent` header. If the upstream is OTel-instrumented, its handler will see aastro's span as the parent.
 
 `baggage` headers are also propagated, allowing cross-service key-value context (e.g. `tenant_id`) to flow through the
 gateway.
 
-The propagator is installed unconditionally — even with `tracing.enabled: false`, kono still extracts and re-injects
+The propagator is installed unconditionally — even with `tracing.enabled: false`, aastro still extracts and re-injects
 `traceparent`. This makes the gateway transparent to distributed tracing even when its own spans are not recorded.
 
 ## Disabled Mode
@@ -192,10 +192,10 @@ A typical setup with the OTel Collector and Jaeger:
 ```yaml
 # docker-compose.yaml
 services:
-  kono:
-    image: kono:latest
+  aastro:
+    image: aastro:latest
     volumes:
-      - ./kono.yaml:/etc/kono/config.yaml
+      - ./aastro.yaml:/etc/aastro/config.yaml
     ports: [ "7805:7805" ]
     depends_on: [ otel-collector ]
 
@@ -240,10 +240,10 @@ service:
 ```
 
 ```yaml
-# kono.yaml
+# aastro.yaml
 gateway:
   service:
-    name: kono
+    name: aastro
   observability:
     tracing:
       enabled: true
@@ -255,25 +255,25 @@ gateway:
         interval: 1s
 ```
 
-After a request, find the trace in Jaeger UI at `http://localhost:16686` — service `kono`, operation `kono.request`.
+After a request, find the trace in Jaeger UI at `http://localhost:16686` — service `aastro`, operation `aastro.request`.
 
 ## Reading Waterfalls
 ---
 
-A few patterns to recognize when looking at a kono trace:
+A few patterns to recognize when looking at a aastro trace:
 
-**Long `kono.upstream.wait_us`.** The upstream span starts at the same time as its siblings, but most of its duration is
+**Long `aastro.upstream.wait_us`.** The upstream span starts at the same time as its siblings, but most of its duration is
 the semaphore wait. Look for the `semaphore.acquired` event to see where actual work begins. To increase parallelism,
 raise `max_parallel_upstreams` on the flow.
 
-**`kono.upstream` span with error status and `kono.upstream.error_kind=connection`.** The upstream was unreachable.
-Check the `kono_circuit_breaker_state` metric — if it is `1` (open), the breaker rejected subsequent requests without
+**`aastro.upstream` span with error status and `aastro.upstream.error_kind=connection`.** The upstream was unreachable.
+Check the `aastro_circuit_breaker_state` metric — if it is `1` (open), the breaker rejected subsequent requests without
 contacting the upstream.
 
-**Trace stops at `kono.request` with no upstream spans.** The request was rejected before reaching the scatter — usually
-due to a payload-too-large error, or a plugin failure. Look at `http.status_code` on `kono.request`.
+**Trace stops at `aastro.request` with no upstream spans.** The request was rejected before reaching the scatter — usually
+due to a payload-too-large error, or a plugin failure. Look at `http.status_code` on `aastro.request`.
 
 **Single trace spanning multiple services.** When upstreams are also OTel-instrumented, their spans appear as children
-of `kono.upstream`, giving end-to-end visibility from client to backend.
+of `aastro.upstream`, giving end-to-end visibility from client to backend.
 
 ---

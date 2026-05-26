@@ -5,12 +5,12 @@ description: Introduction
 slug: /intro
 ---
 
-# Kono API Gateway
+# Aastro API Gateway
 
-[Kono](https://github.com/starwalkn/kono) is a lightweight, extensible API Gateway written in Go.
+[Aastro](https://github.com/starwalkn/aastro) is a lightweight, extensible API Gateway written in Go.
 It simplifies request routing, fan-out to multiple upstream services, and response aggregation — while remaining fast, predictable, and easy to configure.
 
-Kono focuses on **explicit configuration**, **minimal runtime overhead**, and **clear separation of concerns** between routing, middleware, plugins, and upstream policies.
+Aastro focuses on **explicit configuration**, **minimal runtime overhead**, and **clear separation of concerns** between routing, middleware, plugins, and upstream policies.
 
 ## Key Features
 ---
@@ -37,7 +37,7 @@ Kono focuses on **explicit configuration**, **minimal runtime overhead**, and **
 ## Design Philosophy
 ---
 
-Kono aims to be:
+Aastro aims to be:
 
 - **Small, not bloated** — only core gateway responsibilities
 - **Explicit, not magical** — behavior is visible in configuration

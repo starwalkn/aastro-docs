@@ -28,7 +28,8 @@ const sidebars = {
                 'tracing',
                 'plugin-development',
                 'builtins',
-                'passthrough'
+                'passthrough',
+                'cli'
             ]
         },
     ],

@@ -47,10 +47,10 @@ const config = {
     },
 
     url: 'https://your-docusaurus-site.example.com',
-    baseUrl: '/aastrodocs',
+    baseUrl: '/aastro-docs',
 
     organizationName: 'starwalkn',
-    projectName: 'aastrodocs',
+    projectName: 'aastro-docs',
     trailingSlash: false,
 
     onBrokenLinks: 'throw',

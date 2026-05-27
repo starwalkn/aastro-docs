@@ -39,7 +39,6 @@ When using `exporter: otlp`, no HTTP endpoint is exposed — metrics are pushed 
 :::
 
 ## Available Metrics
----
 
 | Metric                           | Type      | Labels                      | Description                                                               |
 |----------------------------------|-----------|-----------------------------|---------------------------------------------------------------------------|
@@ -54,7 +53,6 @@ When using `exporter: otlp`, no HTTP endpoint is exposed — metrics are pushed 
 | `aastro_circuit_breaker_state`     | Gauge     | `upstream`                  | Circuit breaker state: `0`=closed, `1`=open, `2`=half-open                |
 
 ## Histogram Buckets
----
 
 Aastro uses fixed bucket boundaries tuned for typical gateway latencies:
 
@@ -64,7 +62,6 @@ Aastro uses fixed bucket boundaries tuned for typical gateway latencies:
 | `aastro_upstream_latency_seconds`  | 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5     |
 
 ## Upstream Error Kinds
----
 
 The `kind` label on `aastro_upstream_errors_total` reflects the internal error classification:
 
@@ -80,7 +77,6 @@ The `kind` label on `aastro_upstream_errors_total` reflects the internal error c
 | `policy_violation` | Response violated upstream policy (`allowed_statuses`, `require_body`)       |
 
 ## Failure Reasons
----
 
 `aastro_failed_requests_total` tracks requests that never reach a flow:
 
@@ -91,7 +87,6 @@ The `kind` label on `aastro_upstream_errors_total` reflects the internal error c
 | `body_too_large`    | Request body exceeded the gateway-wide limit (5 MB) |
 
 ## Grafana
----
 
 When using `exporter: otlp`, the recommended setup is:
 
@@ -105,7 +100,6 @@ must be started with `--web.enable-remote-write-receiver`.
 When using `exporter: prometheus`, Prometheus scrapes aastro directly — no Collector needed. Point the scrape target at the admin port (`server.admin_port`).
 
 ### Recommended Panels
----
 
 | Panel                | Query                                                                          |
 |----------------------|--------------------------------------------------------------------------------|

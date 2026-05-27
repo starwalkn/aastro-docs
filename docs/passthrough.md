@@ -16,7 +16,6 @@ This is the correct mode for:
 - **Any response where buffering is unacceptable** — AI streaming APIs, live data feeds, file downloads
 
 ## Configuration
----
 
 ```yaml
 flows:
@@ -39,7 +38,6 @@ flows:
 | Response plugins do not run | The response body is already streaming by the time response plugins would execute |
 
 ## How It Works
----
 
 The passthrough pipeline differs from the standard flow in several ways:
 
@@ -54,7 +52,6 @@ The passthrough pipeline differs from the standard flow in several ways:
 **Double-write protection.** A `trackingWriter` wrapper tracks whether `WriteHeader` or `Write` have already been called. If the upstream errors _after_ partially writing the response, Aastro skips the 502 error response — headers are already sent and the connection state cannot be rolled back.
 
 ## SSE-Specific Considerations
----
 
 For a proper SSE setup, the upstream should set these response headers:
 
@@ -80,15 +77,11 @@ forward_headers: ["Last-Event-ID"]
 ```
 
 ## Response Format
----
 
 Passthrough responses bypass the standard JSON envelope entirely. The upstream status code, headers, and body are forwarded verbatim. There is no `data`/`errors`/`meta` wrapping and no `X-Request-ID` header is added.
 
 ## No Timeout
----
 
 The standard upstream `timeout` field is not applied in passthrough mode — the connection lives as long as the upstream keeps it open or the client disconnects. If the client disconnects, the request context is cancelled and `streamCopy` returns immediately, releasing all resources.
 
 To protect against abandoned upstream connections, rely on the upstream service's own keep-alive and idle timeout settings.
-
----

@@ -39,7 +39,7 @@ const coldarkCold = {
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-    title: 'Every request finds its way',
+    title: 'Aastro Documentation',
     tagline: 'Aastro (Åstro) is a lightweight API Gateway in Go — parallel fan-out, flexible aggregation, and zero configuration magic.',
     favicon: 'img/rabbt.svg',
     future: {
@@ -86,12 +86,11 @@ const config = {
                 respectPrefersColorScheme: false,
             },
             announcementBar: {
-                id: 'contributors',
-                content: '✦  We are looking for active contributors',
-                // CSS overrides background/text — these stay as safe defaults
-                backgroundColor: '#EBF3FC',
-                textColor: '#1A6FD4',
-                isCloseable: true,
+                id: 'topbar',
+                content: '<a href="mailto:alexander.pikeev@gmail.com">Contact us</a>',
+                backgroundColor: '#0f141a',
+                textColor: '#FFFFFF',
+                isCloseable: false,
             },
             navbar: {
                 title: 'Aastro',

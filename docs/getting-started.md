@@ -8,13 +8,11 @@ slug: /getting-started
 # Getting Started
 
 ## Requirements
----
 
 - Go 1.22+ (for building from source)
 - Docker (for container deployment)
 
 ## Install via Docker
----
 
 ```bash
 docker pull starwalkn/aastro:latest
@@ -27,7 +25,6 @@ docker run \
 ```
 
 ## Build from Source
----
 
 ```bash
 git clone https://github.com/starwalkn/aastro.git
@@ -39,7 +36,6 @@ make all GOOS=linux GOARCH=amd64
 ```
 
 ## Minimal Configuration
----
 
 ```yaml
 schema: v1
@@ -48,7 +44,8 @@ gateway:
   server:
     port: 7805
     timeout: 10s
-
+  admin:
+    port: 7806
   routing:
     flows:
       - path: /api/hello
@@ -77,7 +74,6 @@ curl http://localhost:7805/api/hello
 ```
 
 ## Health Check
----
 
 Aastro exposes a built-in health endpoint. The `__` prefix avoids conflicts with user-defined flow paths.
 
@@ -85,5 +81,3 @@ Aastro exposes a built-in health endpoint. The `__` prefix avoids conflicts with
 curl http://localhost:7805/__health
 # → 200 OK
 ```
-
----

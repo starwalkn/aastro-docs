@@ -13,14 +13,12 @@ Aastro can be extended with custom plugins and middlewares compiled as Go shared
 - **Middleware** — wraps the entire flow handler as a standard `http.Handler`. Executes for every request regardless of upstream results.
 
 ## Requirements
----
 
-- Go **1.25.4**
+- Go version from `aastro -V`
 - The plugin must be compiled with the **exact same Go version** as the gateway binary. A mismatch causes a panic at startup.
 - Import `github.com/starwalkn/aastro/sdk` — this is the only dependency required.
 
 ## Writing a Plugin
----
 
 A plugin implements the `sdk.Plugin` interface:
 
@@ -41,7 +39,6 @@ type Plugin interface {
 | `sdk.PluginTypeResponse` | After aggregation | Read and modify response headers and body |
 
 ### Example: request plugin that adds a header
----
 
 ```go
 package main
@@ -78,7 +75,6 @@ func (p *requestIDPlugin) Execute(ctx sdk.Context) error {
 ```
 
 ### Example: response plugin that transforms the body
----
 
 ```go
 package main
@@ -136,7 +132,6 @@ func (p *wrapPlugin) Execute(ctx sdk.Context) error {
 ```
 
 ### sdk.Context
----
 
 `sdk.Context` is the per-request context passed to every plugin:
 
@@ -155,7 +150,6 @@ In the **request phase**, `Response()` returns `nil` — aggregation has not hap
 :::
 
 ## Writing a Middleware
----
 
 A middleware implements the `sdk.Middleware` interface:
 
@@ -178,7 +172,6 @@ type Closer interface {
 Aastro calls `Close()` on shutdown for any middleware that implements it.
 
 ### Example: simple logger middleware
----
 
 ```go
 package main
@@ -222,7 +215,6 @@ func (m *loggerMiddleware) Handler(next http.Handler) http.Handler {
 ```
 
 ## Building the .so File
----
 
 Both plugins and middlewares are compiled with `-buildmode=plugin`:
 
@@ -241,7 +233,6 @@ The exported entry point must be named exactly `NewPlugin` for plugins and `NewM
 :::
 
 ## Project Structure
----
 
 A typical custom plugin repository looks like this:
 
@@ -265,7 +256,6 @@ require github.com/starwalkn/aastro/sdk v0.3.0
 ```
 
 ## Registering in Configuration
----
 
 ```yaml
 flows:
@@ -292,7 +282,6 @@ flows:
 The `path` field points to the **directory** containing the `.so` file. Aastro resolves the full path as `{path}/{name}.so`.
 
 ## Execution Order
----
 
 ```
 Middlewares (outermost first)
@@ -305,5 +294,3 @@ Middlewares (outermost first)
 Middlewares wrap the entire handler including plugins. Within each phase, plugins execute in the order they appear in configuration.
 
 Plugins with the same `name` are deduplicated — if the same plugin is listed twice in a flow, it is loaded and executed only once.
-
----

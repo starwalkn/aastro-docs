@@ -43,7 +43,6 @@ high-traffic services, the size limit dominates and the timeout rarely fires.
 :::
 
 ## Span Hierarchy
----
 
 A typical request to a fan-out flow produces this tree:
 
@@ -73,7 +72,6 @@ aastro.request                   [SpanKindServer]
 | `aastro.upstream` | Beginning of upstream call (per upstream) | Upstream call returns, including all retries | `aastro.scatter` (or `aastro.request` for passthrough) |
 
 ## Span Attributes
----
 
 ### `aastro.request`
 
@@ -96,7 +94,6 @@ aastro.request                   [SpanKindServer]
 | `server.address`           | Upstream host:port                                            |
 | `aastro.upstream.name`       | Configured upstream name                                      |
 | `aastro.upstream.host`       | Host selected by the load balancer                            |
-| `aastro.upstream.wait_us`    | Microseconds spent waiting for the parallelism semaphore      |
 | `aastro.upstream.error_kind` | Error classification on failure (see [Metrics](./metrics.md)) |
 | `aastro.upstream.mode`       | `passthrough` for passthrough flows; absent otherwise         |
 | `aastro.flow.path`           | Flow path the upstream was called from                        |
@@ -115,14 +112,7 @@ aastro.request                   [SpanKindServer]
 | `aastro.plugin.name` | Configured plugin name  |
 | `aastro.plugin.type` | `request` or `response` |
 
-### Span Events
-
-| Event                | When recorded                                                                                                                                                                |
-|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `semaphore.acquired` | Recorded on `aastro.upstream` when the semaphore wait exceeded the configured threshold. Useful to visually distinguish wait time from actual upstream work in waterfall views |
-
 ## Resource Attributes
----
 
 Every exported span carries resource attributes describing the aastro process. The same resource is attached to metrics,
 so traces and metrics from one process are correlated by `service.name` and `service.instance.id` in the backend.
@@ -137,7 +127,6 @@ so traces and metrics from one process are correlated by `service.name` and `ser
 Additional attributes from the `OTEL_RESOURCE_ATTRIBUTES` environment variable are merged in.
 
 ## Sampling
----
 
 Sampling determines which traces are recorded. Aastro uses a `ParentBased` sampler that respects the incoming
 `traceparent` flag — if an upstream service has already decided to sample a trace, aastro honors that decision regardless
@@ -159,7 +148,6 @@ e.g. `0.05`) keep ingestion costs manageable while still providing statistical v
 :::
 
 ## Propagation
----
 
 Aastro propagates W3C trace context bidirectionally:
 
@@ -175,7 +163,6 @@ The propagator is installed unconditionally — even with `tracing.enabled: fals
 `traceparent`. This makes the gateway transparent to distributed tracing even when its own spans are not recorded.
 
 ## Disabled Mode
----
 
 When `tracing.enabled: false`:
 
@@ -185,7 +172,6 @@ When `tracing.enabled: false`:
 - The internal `otel.Tracer` returns a no-op tracer; instrumented code paths run with minimal overhead.
 
 ## Setup with OpenTelemetry Collector
----
 
 A typical setup with the OTel Collector and Jaeger:
 
@@ -258,13 +244,8 @@ gateway:
 After a request, find the trace in Jaeger UI at `http://localhost:16686` — service `aastro`, operation `aastro.request`.
 
 ## Reading Waterfalls
----
 
 A few patterns to recognize when looking at a aastro trace:
-
-**Long `aastro.upstream.wait_us`.** The upstream span starts at the same time as its siblings, but most of its duration is
-the semaphore wait. Look for the `semaphore.acquired` event to see where actual work begins. To increase parallelism,
-raise `max_parallel_upstreams` on the flow.
 
 **`aastro.upstream` span with error status and `aastro.upstream.error_kind=connection`.** The upstream was unreachable.
 Check the `aastro_circuit_breaker_state` metric — if it is `1` (open), the breaker rejected subsequent requests without
@@ -275,5 +256,3 @@ due to a payload-too-large error, or a plugin failure. Look at `http.status_code
 
 **Single trace spanning multiple services.** When upstreams are also OTel-instrumented, their spans appear as children
 of `aastro.upstream`, giving end-to-end visibility from client to backend.
-
----

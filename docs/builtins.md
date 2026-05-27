@@ -9,8 +9,6 @@ slug: /builtins
 
 Aastro ships with a set of ready-to-use plugins and middlewares. They are available without any additional installation — set `source: builtin` in the flow configuration.
 
----
-
 ## Plugins
 
 Plugins operate on the JSON response body after aggregation. All three built-in plugins run in the **response phase**.
@@ -39,8 +37,6 @@ No configuration parameters.
 
 Transformation is applied recursively to nested objects and arrays. If the response body is not valid JSON, the body is passed through unchanged without error.
 
----
-
 ### snakeify
 
 Transforms all JSON field names in the response body to `snake_case`.
@@ -64,8 +60,6 @@ No configuration parameters.
 ```
 
 Transformation is applied recursively to nested objects and arrays. If the response body is not valid JSON, the body is passed through unchanged without error.
-
----
 
 ### masker
 
@@ -98,8 +92,6 @@ plugins:
 
 Masking is applied recursively — if a specified field appears at any nesting level, it is masked. Field matching is case-sensitive and exact. If `fields` is empty or not configured, the plugin is a no-op.
 
----
-
 ## Middlewares
 
 Middlewares wrap the entire flow handler and run for every request. They execute in the order defined in configuration — the first middleware listed is the outermost wrapper.
@@ -126,8 +118,6 @@ middlewares:
 Place `recoverer` first in the middleware list so it wraps all other middlewares and handlers.
 :::
 
----
-
 ### logger
 
 Logs each request with method, path, status code, duration, and request ID.
@@ -148,8 +138,6 @@ middlewares:
 
 Log output uses structured JSON fields: `method`, `path`, `status`, `duration`, `request_id`, and optionally `body`.
 
----
-
 ### compressor
 
 Compresses the response body using gzip or deflate when the client signals support via `Accept-Encoding`.
@@ -169,8 +157,6 @@ middlewares:
 | `alg` | string | `gzip` | Compression algorithm: `gzip` or `deflate` |
 
 The middleware checks the incoming `Accept-Encoding` header. If the header does not include the configured algorithm, the response is passed through uncompressed. `Content-Length` is removed from the response since the compressed body length is unknown in advance.
-
----
 
 ### cors
 
@@ -207,8 +193,6 @@ Preflight requests (`OPTIONS` with `Origin` and `Access-Control-Request-Method` 
 :::warning
 `allow_credentials: true` cannot be combined with `allowed_origins: ["*"]`. Using wildcard origins with credentials is rejected at initialization.
 :::
-
----
 
 ### auth
 
@@ -276,5 +260,3 @@ middlewares:
 **JWKS caching:** on startup, the middleware performs a blocking fetch of the JWKS endpoint. If the fetch fails, initialization fails and the gateway does not start. After that, keys are refreshed in the background every `jwks_refresh_interval`. On a cache miss during request handling (unknown `kid`), an immediate on-demand refresh is triggered before rejecting the token.
 
 **Unauthorized response:** all validation failures return `401 Unauthorized` with no detail about the specific failure reason.
-
----

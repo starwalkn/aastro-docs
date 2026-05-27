@@ -1,128 +1,88 @@
-.features {
-  background: transparent;
+.docsSection {
   padding: 4rem 0 5rem;
-  width: 100%;
-  position: relative;
+  background: #ffffff;
 }
 
-.featureRow {
+.header {
+  margin-bottom: 2.5rem;
+}
+
+.header h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+  color: #0f141a;
+}
+
+.header p {
+  font-size: 1rem;
+  color: #5b6573;
+  margin: 0;
+}
+
+.grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 3rem;
-  align-items: center;
-  padding: 3rem 0;
-  border-bottom: 1px solid rgba(221, 232, 244, 0.5);
-}
-
-.featureRow:last-child {
-  border-bottom: none;
-}
-
-.featureRowReverse {
-  direction: rtl;
-}
-
-.featureRowReverse > * {
-  direction: ltr;
-}
-
-.featureText {
-  display: flex;
-  flex-direction: column;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
 }
 
-.featureTitle {
-  font-family: var(--aastro-font-sans);
-  font-weight: 900;
-  font-size: 2.9rem;
-  color: var(--ifm-heading-color);
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-  margin: 0;
-}
-
-.gradientWord {
-  background: linear-gradient(
-          90deg,
-          #1A6FD4 0%,
-          #5AA3DE 50%,
-          #1A6FD4 100%
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: shimmer 6s linear infinite;
-  -webkit-font-smoothing: antialiased;
-  font-synthesis: none;
-}
-
-@keyframes shimmer {
-  0%   { background-position: 0% center; }
-  100% { background-position: 200% center; }
-}
-
-.featureDesc {
-  color: var(--ifm-font-color-base);
-  line-height: 1.75;
-  margin: 0;
-  font-weight: 400;
-  font-size: 1.12rem;
-}
-
-.terminal {
-  background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(14px) saturate(180%);
-  -webkit-backdrop-filter: blur(14px) saturate(180%);
-  border: 1px solid rgba(221, 232, 244, 0.75);
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow:
-          0 14px 44px rgba(26, 111, 212, 0.14),
-          0 4px 14px rgba(26, 111, 212, 0.06),
-          inset 0 1px 0 rgba(255, 255, 255, 0.5);
-}
-
-.terminalDots {
+.card {
   display: flex;
-  gap: 6px;
-  padding: 11px 16px;
-  background: rgba(248, 251, 255, 0.55);
-  border-bottom: 1px solid rgba(221, 232, 244, 0.5);
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+
+  text-decoration: none !important;
+  color: inherit;
+
+  padding: 1.5rem;
+
+  background: #ffffff;
+  border: 1px solid #d5dbdb;
+  border-radius: 8px;
+
+  transition: border-color 0.15s ease;
 }
 
-.terminalDots span {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  display: block;
+.card:hover {
+  border-color: #1A6FD4;
 }
 
-.terminalDots span:nth-child(1) { background: #5AA3DE; }
-.terminalDots span:nth-child(2) { background: #5AA3DE; opacity: 0.6; }
-.terminalDots span:nth-child(3) { background: #5AA3DE; opacity: 0.3; }
+.cardContent {
+  flex: 1;
+  min-width: 0;
+}
 
-.terminalCode {
+.cardContent h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f141a;
+}
+
+.cardContent p {
   margin: 0;
-  padding: 1.25rem 1.5rem;
-  font-family: "JetBrains Mono", monospace;
-  font-size: 0.88rem;
-  line-height: 1.75;
-  color: #041E42;
-  background: transparent !important;
-  white-space: pre;
-  overflow-x: auto;
+  color: #5b6573;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  font-weight: 400;
 }
 
-@media screen and (max-width: 996px) {
-  .featureRow {
+.arrow {
+  color: #1A6FD4;
+  font-size: 1.1rem;
+  font-weight: 400;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+@media (max-width: 996px) {
+  .grid {
     grid-template-columns: 1fr;
-    direction: ltr;
-    gap: 1.5rem;
   }
 
-  .featureRowReverse {
-    direction: ltr;
+  .docsSection {
+    padding: 3rem 0 4rem;
   }
 }

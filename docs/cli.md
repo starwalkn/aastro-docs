@@ -17,21 +17,18 @@ Both follow standard Unix conventions: short and long flags (`-c` / `--config`),
 `--` as a positional argument terminator, and `KEY=VALUE` for long flag values.
 
 ## aastro
----
 
 The daemon. Running `aastro` without flags loads the configuration and starts the gateway. All other operations are
 flags rather than subcommands, following the convention used by `nginx`, `haproxy`, and other long-lived system
 services.
 
 ### Usage
----
 
 ```
 aastro [options]
 ```
 
 ### Options
----
 
 | Short | Long                | Description                                                       |
 |-------|---------------------|-------------------------------------------------------------------|
@@ -44,7 +41,6 @@ aastro [options]
 | `-h`  | `--help`            | Print help and exit                                               |
 
 ### Configuration path resolution
----
 
 When `--config` is not specified, Aastro looks for the configuration file in this order:
 
@@ -54,7 +50,6 @@ When `--config` is not specified, Aastro looks for the configuration file in thi
 If neither is set or the file is missing, Aastro exits with an error.
 
 ### Exit codes
----
 
 | Code | Meaning                                          |
 |------|--------------------------------------------------|
@@ -66,7 +61,6 @@ The configuration error code is distinct so that CI pipelines can react differen
 failure.
 
 ### Testing configuration
----
 
 `aastro -t` parses the configuration file, applies defaults, resolves environment substitutions, and validates the
 result. It does **not** start the server, bind ports, or connect to upstreams.
@@ -95,7 +89,6 @@ $ echo $?
 ```
 
 ### Dumping the effective configuration
----
 
 `aastro -T` performs the same validation as `-t`, then writes the **effective configuration** to stdout — the
 configuration as Aastro actually sees it after defaults are applied, environment variables are substituted, and includes
@@ -128,7 +121,6 @@ The dumped configuration is valid input for Aastro — you can feed it back via 
 :::
 
 ### Version information
----
 
 `aastro -v` prints a single-line product/version string:
 
@@ -150,7 +142,6 @@ commit:         abc1234
 Use `-V` when reporting bugs — the commit hash uniquely identifies the source revision the binary was built from.
 
 ### Running in Docker
----
 
 The official image runs `aastro` as the entrypoint, so flags pass through directly:
 
@@ -166,7 +157,6 @@ docker run --rm starwalkn/aastro:1.2.3 -V
 ```
 
 ### Signals
----
 
 Aastro responds to standard process signals:
 
@@ -178,7 +168,6 @@ Aastro responds to standard process signals:
 The graceful shutdown timeout is 10 seconds. After that, in-flight requests are abandoned and the process exits.
 
 ## aastroctl
----
 
 The companion tool. Unlike `aastro`, it uses a subcommand-based CLI similar to `kubectl` or `git`, because it bundles
 unrelated operations (plugin scaffolding today; daemon administration in future releases).
@@ -191,7 +180,6 @@ aastroctl <command> [flags]
 ```
 
 ### Commands
----
 
 | Command       | Description                                             |
 |---------------|---------------------------------------------------------|
@@ -199,7 +187,6 @@ aastroctl <command> [flags]
 | `help`        | Show help for any command (also available via `--help`) |
 
 ### Global flags
----
 
 | Long        | Description                               |
 |-------------|-------------------------------------------|
@@ -207,7 +194,6 @@ aastroctl <command> [flags]
 | `--help`    | Print help and exit                       |
 
 ### `aastroctl plugin init`
----
 
 Generates a starter `.go` file for a new plugin or middleware. The generated code compiles as-is — you can run
 `go build -buildmode=plugin` on it immediately and load the resulting `.so` into Aastro.
@@ -249,12 +235,10 @@ overwrite it.
 See [Plugin & Middleware Development](plugin-development) for the full guide on writing plugins.
 
 ## Conventions
----
 
 A few conventions to keep in mind when scripting against either binary.
 
 ### Output streams
----
 
 - **stdout** carries the primary output of the command — version strings, configuration dumps, future command results.
 - **stderr** carries diagnostic messages — `test is successful`, `created myplugin.go`, error reports.
@@ -268,7 +252,6 @@ aastroctl --version | cut -d/ -f2             # parse just the version
 ```
 
 ### Short flag grouping
----
 
 Short boolean flags can be combined. These are equivalent:
 
@@ -281,7 +264,6 @@ aastro -tqc config.yaml
 The value-taking flag (`-c` here) must come last in the group; its argument follows immediately.
 
 ### Environment variables
----
 
 | Variable        | Used by  | Description                              |
 |-----------------|----------|------------------------------------------|

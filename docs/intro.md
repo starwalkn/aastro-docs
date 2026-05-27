@@ -13,7 +13,6 @@ It simplifies request routing, fan-out to multiple upstream services, and respon
 Aastro focuses on **explicit configuration**, **minimal runtime overhead**, and **clear separation of concerns** between routing, middleware, plugins, and upstream policies.
 
 ## Key Features
----
 
 - **High-performance Go core** — built with simplicity and low latency in mind
 - **Multiple upstreams per route** — dispatch requests to several services in parallel and aggregate their responses
@@ -26,7 +25,6 @@ Aastro focuses on **explicit configuration**, **minimal runtime overhead**, and 
 - **Declarative YAML configuration**
 
 ## Typical Use Cases
----
 
 - API composition / Backend-for-Frontend (BFF)
 - Fan-out and aggregation of microservice responses
@@ -35,7 +33,6 @@ Aastro focuses on **explicit configuration**, **minimal runtime overhead**, and 
 - Lightweight alternative to large API gateway solutions
 
 ## Design Philosophy
----
 
 Aastro aims to be:
 
@@ -43,5 +40,3 @@ Aastro aims to be:
 - **Explicit, not magical** — behavior is visible in configuration
 - **Composable** — features are built from simple primitives
 - **Observable by default** — metrics, traces, and request IDs are first-class, not afterthoughts
-
----

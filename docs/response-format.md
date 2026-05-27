@@ -28,7 +28,6 @@ Every response from Aastro follows a consistent JSON envelope — whether the re
 | `meta.partial` | bool | `true` when `best_effort: true` and at least one upstream failed |
 
 ## HTTP Status Codes
----
 
 The gateway selects the HTTP status code based on the aggregation outcome:
 
@@ -51,7 +50,6 @@ Early errors — those that occur before a flow is reached (rate limit, payload 
 :::
 
 ## Error Codes
----
 
 | Code | HTTP Status | Description |
 |---|---|---|
@@ -66,7 +64,6 @@ Early errors — those that occur before a flow is reached (rate limit, payload 
 | `INTERNAL` | 500 | Unexpected internal gateway error |
 
 ## X-Request-ID Header
----
 
 Every response includes an `X-Request-ID` header. If the incoming request already carries an `X-Request-ID` header, the gateway reuses that value — enabling end-to-end request tracing across services. If not, a new lowercase ULID is generated.
 
@@ -77,7 +74,6 @@ X-Request-ID: 01hwz3kbpq3e8xt4n1v7gfm2rz
 The same value is available in the response body under `meta.request_id`.
 
 ## Examples
----
 
 **Full success — merge strategy:**
 
@@ -153,5 +149,3 @@ Content-Type: application/json; charset=utf-8
 :::info
 Passthrough flows (`passthrough: true`) bypass the JSON envelope entirely. The upstream response body and headers are forwarded verbatim — no `data`/`errors`/`meta` wrapping is applied.
 :::
-
----

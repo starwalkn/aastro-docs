@@ -1,36 +1,47 @@
 // @ts-check
 
-// This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
-
 /**
- * Creating a sidebar enables you to:
- - create an ordered group of docs
- - render a sidebar for each doc of that group
- - provide next/previous navigation
-
- The sidebars can be generated from the filesystem, or explicitly defined here.
-
- Create as many sidebars as you want.
-
- @type {import('@docusaurus/plugin-content-docs').SidebarsConfig}
+ * @type {import('@docusaurus/plugin-content-docs').SidebarsConfig}
  */
 const sidebars = {
     docsSidebar: [
+        'intro',
+        'getting-started',
         {
             type: 'category',
-            label: 'Docs',
+            label: 'Core Concepts',
+            collapsed: true,
             items: [
-                'intro',
-                'getting-started',
                 'configuration',
                 'response-format',
+                'passthrough',
+            ],
+        },
+        {
+            type: 'category',
+            label: 'Observability',
+            collapsed: true,
+            items: [
                 'metrics',
                 'tracing',
+            ],
+        },
+        {
+            type: 'category',
+            label: 'Extending Aastro',
+            collapsed: true,
+            items: [
                 'plugin-development',
                 'builtins',
-                'passthrough',
-                'cli'
-            ]
+            ],
+        },
+        {
+            type: 'category',
+            label: 'Reference',
+            collapsed: true,
+            items: [
+                'cli',
+            ],
         },
     ],
 };

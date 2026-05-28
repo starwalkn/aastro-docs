@@ -13,7 +13,7 @@
     --ifm-color-primary-lightest: #A8CFEC;
 
     --ifm-background-color: #F8FBFF;
-    --ifm-navbar-background-color: rgba(255, 255, 255, 0.65);
+    --ifm-navbar-background-color: #FFFFFF;
     --ifm-sidebar-background-color: rgba(234, 240, 247, 0.7);
     --ifm-heading-color: #0f141a;
     --ifm-font-color-base: #0f141a;
@@ -225,10 +225,12 @@ h3 {
     color: #0f141a;
 }
 
+.markdown table td:not(:last-child) {
+    white-space: nowrap;
+}
+
 .navbar {
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: var(--aastro-glass-blur);
-    -webkit-backdrop-filter: var(--aastro-glass-blur);
+    background: #FFFFFF;
     border-bottom: 1px solid var(--aastro-border-strong);
     box-shadow: none;
     position: sticky;
@@ -281,8 +283,7 @@ h3 {
 
 .navbar__search .navbar__search-input:focus {
     background: rgba(255, 255, 255, 0.85) url('data:image/svg+xml;utf8,<svg fill="%231A6FD4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" height="16px" width="16px"><path d="M6.02945,10.20327a4.17382,4.17382,0,1,1,4.17382-4.17382A4.15609,4.15609,0,0,1,6.02945,10.20327Zm9.69195,4.2199L10.8989,9.59979A5.88021,5.88021,0,0,0,12.058,6.02856,6.00467,6.00467,0,1,0,9.59979,10.8989l4.82338,4.82338a.89729.89729,0,0,0,1.29912,0,.89749.89749,0,0,0-.00087-1.29909Z"/></svg>') no-repeat 0.75rem center / 1rem 1rem;
-    border-color: var(--ifm-color-primary);
-    box-shadow: 0 0 0 4px rgba(26, 111, 212, 0.12);
+    border-color: var(--ifm-color-primary-dark);
     outline: none !important;
 }
 
@@ -297,8 +298,8 @@ h3 {
 }
 
 .navbar__search:focus-within kbd {
-    background: var(--ifm-color-primary);
-    border-color: var(--ifm-color-primary);
+    background: var(--ifm-color-primary-dark);
+    border-color: var(--ifm-color-primary-dark);
     color: #EBF3FC;
 }
 
@@ -369,20 +370,36 @@ h3 {
     background-color: rgba(26, 111, 212, 0.10);
 }
 
+/* Hide the default Docusaurus caret (right-side chevron) */
 .menu__link--sublist-caret::after {
-    background-color: transparent !important;
+    display: none !important;
 }
 
-.menu__caret {
-    order: -1;
-    margin-right: 0.25rem;
-    margin-left: 0;
-    background-color: rgba(26, 111, 212, 0.08);
-    border-radius: 4px;
+/* Give the category link a left gutter for the triangle */
+.menu__list-item-collapsible > .menu__link--sublist-caret {
+    position: relative;
+    padding-left: 1.5rem;
 }
 
-.menu__caret:hover {
-    background-color: rgba(26, 111, 212, 0.15);
+/* Filled triangle, rounded corners, sitting in the left gutter */
+.menu__list-item-collapsible > .menu__link--sublist-caret::before {
+    content: "";
+    position: absolute;
+    left: 0.5rem;
+    top: 50%;
+    width: 0.6rem;
+    height: 0.6rem;
+    transform: translateY(-50%);
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><path d="M3 1.5 L7.5 5 L3 8.5 Z" fill="%23424650" stroke="%23424650" stroke-width="1.4" stroke-linejoin="round"/></svg>');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    transition: transform 0.15s ease;
+}
+
+/* Rotate the triangle down when the category is expanded */
+.menu__list-item-collapsible > .menu__link--sublist-caret[aria-expanded="true"]::before {
+    transform: translateY(-50%) rotate(90deg);
 }
 
 .theme-doc-version-badge {
@@ -528,6 +545,176 @@ div[class*="admonition"][class*="success"] {
     flex: 1;
     margin: 0;
     margin-left: 6rem;
+}
+
+
+/* ============================================================
+   ДОБАВИТЬ В custom.css — стилизация контента документации.
+   Вставь этот блок ПЕРЕД секцией @media (max-width: 996px).
+   ============================================================ */
+
+/* --- Tables: AWS-style clean tables --- */
+.markdown table {
+    display: table;
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.95em;
+    border: 1px solid var(--aastro-border-strong);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.markdown table thead {
+    background-color: #f7f9fb;
+}
+
+.markdown table thead tr {
+    border-bottom: 2px solid var(--aastro-border-strong);
+}
+
+.markdown table th {
+    font-weight: 700;
+    color: #0f141a;
+    text-align: left;
+    padding: 0.65rem 0.9rem;
+    border: none;
+}
+
+.markdown table td {
+    padding: 0.6rem 0.9rem;
+    border: none;
+    border-top: 1px solid #eceff1;
+    vertical-align: top;
+}
+
+.markdown table tbody tr {
+    background-color: #ffffff;
+    transition: background-color 0.12s ease;
+}
+
+.markdown table tbody tr:nth-child(even) {
+    background-color: #fafbfc;
+}
+
+.markdown table tbody tr:hover {
+    background-color: #f3f8fd;
+}
+
+/* Inline code inside tables — slightly tighter so cells stay compact */
+.markdown table code {
+    font-size: 0.85em;
+    padding: 0.05rem 0.3rem;
+    white-space: nowrap;
+}
+
+/* --- Headings hierarchy for reference-heavy pages --- */
+.markdown h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #0f141a;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid #eceff1;
+}
+
+.markdown h4 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f141a;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* --- Anchor links on headings (the # that appears on hover) --- */
+.markdown .hash-link {
+    color: var(--ifm-color-primary);
+    opacity: 0;
+    padding-left: 0.4rem;
+    transition: opacity 0.15s ease;
+}
+
+.markdown h1:hover .hash-link,
+.markdown h2:hover .hash-link,
+.markdown h3:hover .hash-link,
+.markdown h4:hover .hash-link {
+    opacity: 0.6;
+}
+
+/* --- Code block comments: make them readable but subdued --- */
+.markdown pre code .token.comment {
+    color: #6a8caa;
+    font-style: italic;
+}
+
+/* --- Strong/bold text in body --- */
+.markdown strong {
+    font-weight: 700;
+    color: #0f141a;
+}
+
+/* --- Blockquotes (if used) --- */
+.markdown blockquote {
+    border-left: 3px solid var(--ifm-color-primary);
+    background-color: #f7f9fb;
+    padding: 0.75rem 1rem;
+    margin: 1.5rem 0;
+    border-radius: 0 6px 6px 0;
+    color: #424650;
+}
+
+.markdown blockquote p {
+    margin-bottom: 0;
+}
+
+/* --- Lists: tighter, cleaner spacing --- */
+.markdown ul,
+.markdown ol {
+    margin-bottom: 1rem;
+    padding-left: 1.4rem;
+}
+
+.markdown li > ul,
+.markdown li > ol {
+    margin-top: 0.15rem;
+    margin-bottom: 0;
+}
+
+/* --- "Table of Contents" on the right: tighten and theme --- */
+.table-of-contents__link:hover,
+.table-of-contents__link--active {
+    color: var(--ifm-color-primary);
+}
+
+.table-of-contents__link--active {
+    font-weight: 700;
+}
+
+.menu__list-item:not(.menu__list-item-collapsible) > .menu__link {
+    padding-left: 1.5rem;
+}
+
+/* --- Pagination (prev/next at page bottom) --- */
+.pagination-nav__link {
+    border: 1px solid var(--aastro-border-strong);
+    border-radius: 8px;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.pagination-nav__link:hover {
+    border-color: var(--ifm-color-primary);
+    background-color: #f7f9fb;
+}
+
+.pagination-nav__sublabel {
+    color: #6a7682;
+    font-size: 0.8rem;
+}
+
+.pagination-nav__label {
+    font-weight: 700;
+    color: #0f141a;
 }
 
 @media (max-width: 996px) {

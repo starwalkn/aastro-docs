@@ -86,11 +86,13 @@ const config = {
                 respectPrefersColorScheme: false,
             },
             announcementBar: {
-                id: 'topbar',
-                content: '<a href="mailto:alexander.pikeev@gmail.com">Contact us</a>',
-                backgroundColor: '#0f141a',
-                textColor: '#FFFFFF',
-                isCloseable: false,
+              id: 'topbar',
+              content:
+                '<span class="topbar-left"><a href="https://github.com/starwalkn/aastro/releases">v0.5.0</a></span>' +
+                '<a href="mailto:alexanderpikeev@gmail.com">Contact us</a>',
+              backgroundColor: '#0f141a',
+              textColor: '#ffffff',
+              isCloseable: false,
             },
             navbar: {
                 title: 'Aastro',

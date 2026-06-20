@@ -64,21 +64,23 @@ gateway:
 | `tls.client_auth`    | string   | false         | `none`  | Client certificate policy: `none`, `optional`, or `require`                   |
 | `tls.client_ca_file` | string   | if not `none` | —       | CA bundle used to verify client certificates                                  |
 
-**Timeout nuance:** `timeout` applies per request to reading the body and writing the response. For passthrough flows
+:::info
+**Timeout:** `timeout` applies per request to reading the body and writing the response. For passthrough flows
 with long-lived connections (SSE, chunked transfer), set a high value or rely on upstream-side timeouts. Admin-side
 timeouts are configured independently — see [Admin](#admin).
 
-**header_timeout nuance:** unlike `timeout`, this only covers reading request headers. It primarily protects against
+**header_timeout:** unlike `timeout`, this only covers reading request headers. It primarily protects against
 Slowloris attacks, which open many connections and dribble headers slowly to exhaust the server. The admin port has its
 own `header_timeout` field.
 
-**TLS nuance:** `client_auth: require` rejects any TLS connection that does not present a valid client certificate
+**TLS:** `client_auth: require` rejects any TLS connection that does not present a valid client certificate
 signed by `client_ca_file`. `optional` accepts connections without a certificate but validates any certificate that is
 presented. `none` disables client authentication entirely. The same `client_ca_file` is used in both `require` and
 `optional` modes.
 
-**TLS version nuance:** TLS 1.0 and 1.1 are intentionally not selectable — both are deprecated by RFC 8996 and disabled
+**TLS version:** TLS 1.0 and 1.1 are intentionally not selectable — both are deprecated by RFC 8996 and disabled
 in modern clients.
+:::
 
 ## Admin
 
@@ -106,19 +108,21 @@ gateway:
 | `header_timeout` | duration | false    | `5s`        | Maximum time to read request headers on the admin port                                           |
 | `enable_pprof`   | bool     | false    | `false`     | Expose Go pprof endpoints under `/debug/pprof/`                                                  |
 
-**Bind address nuance:** binding to `127.0.0.1` means admin endpoints are reachable only from within the container/pod.
+:::info
+**Bind address:** binding to `127.0.0.1` means admin endpoints are reachable only from within the container/pod.
 kubelet probes, in-cluster Prometheus, and local pprof clients all work fine — they share the network namespace. If you
 need to scrape from outside (e.g. external Prometheus), set `bind_addr: 0.0.0.0` deliberately and ensure your network
 policy treats this port as internal.
 
-**Timeout nuance:** the 5-minute default is sized for `pprof.Profile` and `pprof.Trace`, which hold the connection open
+**Timeout:** the 5-minute default is sized for `pprof.Profile` and `pprof.Trace`, which hold the connection open
 for the entire sampling duration (default 30s, but often longer for production diagnostics). Health probes and metrics
 scrapes complete in milliseconds, so the upper bound rarely matters in practice. If you need longer captures, bump this
 value.
 
-**pprof nuance:** pprof endpoints live on the admin port at `/debug/pprof/`, `/debug/pprof/cmdline`,
+**pprof:** pprof endpoints live on the admin port at `/debug/pprof/`, `/debug/pprof/cmdline`,
 `/debug/pprof/profile`, `/debug/pprof/symbol`, and `/debug/pprof/trace`. Because admin binds to localhost by default,
 pprof is reachable only from inside the container — exactly what you want for production diagnostics.
+:::
 
 ## Health & Readiness
 
@@ -131,11 +135,13 @@ Aastro exposes two probe endpoints on the admin port:
 
 Both endpoints return `application/json` and require no configuration.
 
-**Liveness vs readiness nuance:** `/__health` is meant for *liveness* — its only job is to confirm the process is alive.
+:::info
+`/__health` is meant for *liveness* — its only job is to confirm the process is alive.
 It does not check dependencies, because a failing dependency does not get better by restarting the gateway. `/__ready`
 is meant for *readiness* — its job is to gate inbound traffic. During graceful shutdown, `/__ready` returns `503`
 *before* the data port stops accepting connections, giving Kubernetes time to remove the pod from the service endpoints.
 This prevents in-flight requests from being dropped during rolling deployments.
+:::
 
 **Kubernetes example:**
 
@@ -193,19 +199,21 @@ gateway:
 | `tracing.otlp.insecure`  | bool     | false      | `false` | Disable TLS for the OTLP connection               |
 | `tracing.otlp.interval`  | duration | false      | `60s`   | Batch span export interval                        |
 
-**Metrics nuance:** with `exporter: prometheus`, the `/metrics` endpoint is served on the **admin port**, not the data
+:::info
+**Metrics:** with `exporter: prometheus`, the `/metrics` endpoint is served on the **admin port**, not the data
 port. This means Prometheus does not need a client certificate even when the data port enforces mTLS. With
 `exporter: otlp`, no endpoint is exposed — metrics are pushed on the configured interval. See the [Metrics](metrics)
 page for available metrics and Grafana setup.
 
-**Sampling ratio nuance:** `sampling_ratio: 1.0` exports every trace, which is fine for low-traffic services and
+**Sampling ratio:** `sampling_ratio: 1.0` exports every trace, which is fine for low-traffic services and
 indispensable during debugging, but expensive at scale. For high-RPS production deployments consider `0.01` to `0.1` (
 1-10% sampling). Span data volume scales linearly with this value.
 
-**Trace propagation nuance:** Aastro installs the standard W3C Trace Context propagator unconditionally — even when
+**Trace propagation:** Aastro installs the standard W3C Trace Context propagator unconditionally — even when
 `tracing.enabled: false`. Incoming `traceparent` headers are extracted and propagated to upstreams regardless of whether
 Aastro itself exports spans. This preserves distributed tracing context across deployments that haven't enabled the OTLP
 exporter yet.
+:::
 
 ## Routing
 
@@ -230,13 +238,15 @@ gateway:
 | `rate_limiter.enabled` | bool       | `false` | Enable per-IP rate limiting                         |
 | `rate_limiter.config`  | map        | —       | Rate limiter configuration (`limit`, `window`)      |
 
-**Trusted proxies nuance:** when a request arrives from an IP that is _not_ in `trusted_proxies`, Aastro overwrites
+:::info
+**Trusted proxies:** when a request arrives from an IP that is _not_ in `trusted_proxies`, Aastro overwrites
 `X-Forwarded-For`, `X-Forwarded-Proto`, `X-Forwarded-Host`, `X-Forwarded-Port`, and `Forwarded` with values derived from
 the actual connection. When a request comes from a _trusted_ IP, Aastro appends to the existing chain rather than
 overwriting — preserving the full proxy path. Leave this list empty if Aastro is your outermost edge.
 
-**Rate limiter nuance:** the limit is applied per client IP after trusted proxy resolution. The IP used for rate
+**Rate limiter:** the limit is applied per client IP after trusted proxy resolution. The IP used for rate
 limiting is the same one extracted from `X-Forwarded-For` / `X-Real-IP` / `RemoteAddr`.
+:::
 
 ## Flows
 
@@ -286,9 +296,11 @@ flows:
 | `aggregation.on_conflict.policy`          | string | if merge  | `overwrite` | Key collision policy: `overwrite`, `first`, `error`, `prefer` |
 | `aggregation.on_conflict.prefer_upstream` | string | if prefer | —           | Name of the upstream whose values win on collision            |
 
-**best_effort nuance:** when `true` and some upstreams fail, the gateway returns HTTP `206 Partial Content` with both
+:::info
+When `best_effort` is `true` and some upstreams fail, the gateway returns HTTP `206 Partial Content` with both
 `data` (from successful upstreams) and `errors` (from failed ones). When `false`, a single upstream failure causes the
 entire request to fail with the appropriate error code — no partial data is returned.
+:::
 
 ### Aggregation Strategies
 
@@ -298,12 +310,14 @@ entire request to fail with the appropriate error code — no partial data is re
 | `array`     | Wraps each upstream response as an element in a JSON array, preserving order                                                |
 | `namespace` | Places each upstream response under a key equal to the upstream `name`: `{"users": {...}, "stats": {...}}`                  |
 
-**merge nuance:** `merge` requires all upstream responses to be JSON objects (`{}`). If any upstream returns a JSON
+:::info
+**merge:** `merge` requires all upstream responses to be JSON objects (`{}`). If any upstream returns a JSON
 array or primitive, it is treated as a malformed response. With `best_effort: true` such a response contributes an
 `UPSTREAM_MALFORMED` error but does not stop aggregation.
 
-**namespace nuance:** if an upstream returns a `null` body (empty response with no content), its key is written as
+**namespace:** if an upstream returns a `null` body (empty response with no content), its key is written as
 `null` rather than omitted. This makes missing upstream data explicit rather than invisible.
+:::
 
 ### Conflict Policies (merge only)
 
@@ -368,19 +382,21 @@ upstreams:
 | `transport.max_idle_conns_per_host` | int            | false    | `50`     | Maximum idle connections per host                                                      |
 | `transport.idle_conn_timeout`       | duration       | false    | `90s`    | How long an idle connection is kept in the pool before being closed                    |
 
-**path nuance:** path parameters from the flow path (e.g. `{user_id}`) are substituted into the upstream path.
+:::info
+**path parameters:** path parameters from the flow path (e.g. `{user_id}`) are substituted into the upstream path.
 Parameters used in `path` must be declared in the flow `path` — validation rejects undeclared parameters at startup.
 
-**forward_params nuance:** `forward_params` appends path parameters as query string keys — it does not substitute them
+**forward_params:** `forward_params` appends path parameters as query string keys — it does not substitute them
 into the upstream path. Use `path: /v1/users/{user_id}` for path substitution, and `forward_params` when the upstream
 expects them as query args.
 
-**timeout nuance:** `timeout` applies per attempt. With `retry.max_retries: 3` and `timeout: 2s`, the worst-case total
+**timeout:** `timeout` applies per attempt. With `retry.max_retries: 3` and `timeout: 2s`, the worst-case total
 time before the request fails is `3 × 2s = 6s` (plus backoff delay). Set the flow-level `server.timeout` high enough to
 accommodate the full retry budget.
 
-**method nuance:** request body is only forwarded for `POST`, `PUT`, and `PATCH`. For other methods the body is
+**method:** request body is only forwarded for `POST`, `PUT`, and `PATCH`. For other methods the body is
 discarded regardless of the incoming request.
+:::
 
 ### Upstream TLS
 
@@ -402,15 +418,17 @@ default, typically because:
 | `tls.insecure_skip_verify` | bool   | `false` | Disable certificate verification. **Do not use in production**                                 |
 | `tls.min_version`          | string | `1.2`   | Minimum TLS version: `1.2` or `1.3`                                                            |
 
+:::info
 **mTLS nuance:** `cert_file` and `key_file` must either both be set (enabling mTLS) or both be empty (disabling it).
 Setting only one is a validation error.
 
-**server_name nuance:** by default, Go derives SNI from the URL host. If your `hosts` are IP addresses (or DNS names
+**server_name:** by default, Go derives SNI from the URL host. If your `hosts` are IP addresses (or DNS names
 that don't match the certificate's SAN), set `server_name` to the value the upstream certificate is actually issued for.
 
-**insecure_skip_verify nuance:** when enabled, Aastro logs a loud warning on startup for every upstream that uses this
+**insecure_skip_verify:** when enabled, Aastro logs a loud warning on startup for every upstream that uses this
 flag. It is a deliberate escape hatch for local development or initial migration, not a production setting. Treat any
 occurrence of this in production logs as a finding to remediate.
+:::
 
 ## Upstream Policy
 
@@ -446,23 +464,25 @@ policy:
 | `circuit_breaker.reset_timeout` | duration     | —               | Time in open state before transitioning to half-open                                     |
 | `load_balancing.mode`           | string       | —               | `round_robin` or `least_conns`. Only active when multiple `hosts` are configured         |
 
-**allowed_status_codes nuance:** policy violations (wrong status code, empty body) are recorded _after_ the circuit
+:::info
+**allowed_status_codes:** policy violations (wrong status code, empty body) are recorded _after_ the circuit
 breaker update. A misconfigured `allowed_status_codes` that rejects a healthy `200` response will not cause the circuit
 breaker to open — only true transport-level failures (timeout, connection error, 5xx) count toward the circuit breaker
 threshold.
 
-**circuit_breaker nuance:** the breaker has three states. **Closed** — requests pass through normally. **Open** — all
+**circuit_breaker:** the breaker has three states. **Closed** — requests pass through normally. **Open** — all
 requests are immediately rejected without contacting the upstream; the `circuit_open` error kind is recorded. *
 *Half-open** — one probe request is allowed through; success closes the breaker, failure returns it to open. State is
 exposed via the `aastro_circuit_breaker_state` metric: `0`=closed, `1`=open, `2`=half-open.
 
-**retry nuance:** retries only trigger when the response status matches `retry_on_statuses` _or_ when the upstream
+**retry:** retries only trigger when the response status matches `retry_on_statuses` _or_ when the upstream
 returns an error (connection failure, timeout). A successful response with an unexpected status code (caught by
 `allowed_status_codes`) does _not_ trigger a retry.
 
-**load_balancer nuance:** `round_robin` cycles through hosts sequentially per request using an atomic counter.
+**load_balancer:** `round_robin` cycles through hosts sequentially per request using an atomic counter.
 `least_conns` picks the host with the fewest active connections at the time of dispatch. With a single host, the `mode`
 setting is ignored.
+:::
 
 ## Plugins
 
@@ -518,9 +538,11 @@ Middlewares use the same `name`, `source`, `path`, and `config` fields as plugin
 standard `http.Handler` middleware and execute in the order defined — the first middleware in the list is the outermost
 wrapper.
 
-**Middleware vs plugin nuance:** middlewares wrap the HTTP handler and run for every request regardless of upstream
+:::info
+**Middleware vs plugin:** middlewares wrap the HTTP handler and run for every request regardless of upstream
 results. Plugins are invoked explicitly at defined phases in the request lifecycle. Use middlewares for cross-cutting
 concerns (authentication, logging, recovery), and plugins for data transformation.
+:::
 
 Built-in middlewares:
 

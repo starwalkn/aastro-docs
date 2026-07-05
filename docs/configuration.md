@@ -82,6 +82,69 @@ presented. `none` disables client authentication entirely. The same `client_ca_f
 in modern clients.
 :::
 
+## TLS Certificate Hot-Reload
+
+Aastro reloads TLS certificates without restarting the process or dropping
+connections. This applies to **both** the inbound data port (`server.tls`) and
+every upstream that uses mTLS (`upstreams[].tls`). There is no flag to enable it
+and no reload command to run — rotation is picked up automatically on the paths
+already configured.
+
+```yaml
+gateway:
+  server:
+    tls:
+      enabled: true
+      cert_file: /etc/aastro/server.crt   # replace this file → reloaded automatically
+      key_file:  /etc/aastro/server.key
+      client_ca_file: /etc/aastro/client-ca.crt
+```
+
+:::info
+**How it works:** Aastro watches the *directories* containing your `cert_file`,
+`key_file`, `ca_file`, and `client_ca_file` — not the individual files. When any
+of them changes, the new material is read, validated, and atomically swapped into
+memory. New TLS handshakes use the new certificate; connections already
+established finish on the old one and pick up the new certificate when they next
+reconnect.
+
+Directory-level watching is deliberate: it handles both atomic file replacement on
+a host (where tools write to a temporary file and rename it over the target) and
+Kubernetes secret mounts (where the projected files are updated via a symlink swap
+rather than an in-place write). Rotation through cert-manager, Vault Agent, or
+SPIFFE/SPIRE is therefore hands-off.
+:::
+
+:::info
+**Validation before swap:** a rotation is applied only if the new certificate —
+and CA bundle, if configured — parse successfully. If the material on disk is
+malformed, the error is logged and the previously loaded certificate stays live: a
+broken rotation cannot take the listener down. When a certificate and its CA are
+rotated together, a failure in either leaves *both* the previous certificate and
+the previous CA in place, so the listener is never left in a half-updated state.
+:::
+
+:::tip
+**Confirming a reload:** each successful reload emits an `info` log line:
+
+`{"level":"info","msg":"tls certs reloaded","dir":"/etc/aastro/certs"}`
+
+A failed reload emits `tls reload failed, keeping old cert` at `error` level.
+Watch for the latter in production — it means the certificate on disk rotated but
+Aastro rejected it, so the live certificate is now older than what your cert
+manager believes is deployed.
+:::
+
+:::info
+**Avoiding spurious reloads:** because Aastro watches the whole directory,
+unrelated writes in a certificate directory (an OpenSSL `.srl` serial file, or a
+temporary file written next to the target) can trigger an extra reload. These are
+harmless — the reload re-reads and re-validates the same material, which is a
+no-op — but if you want quiet logs, keep CA-management artifacts and temporary
+files out of the directories that hold your live certificates. In Kubernetes this
+is automatic: each secret mounts into its own directory.
+:::
+
 ## Admin
 
 Aastro runs admin endpoints on a separate listener: health probes, metrics (when the Prometheus exporter is used), and
@@ -428,6 +491,10 @@ that don't match the certificate's SAN), set `server_name` to the value the upst
 **insecure_skip_verify:** when enabled, Aastro logs a loud warning on startup for every upstream that uses this
 flag. It is a deliberate escape hatch for local development or initial migration, not a production setting. Treat any
 occurrence of this in production logs as a finding to remediate.
+
+**Hot-reload:** upstream client certificates and CA bundles are reloaded
+automatically when the files change, exactly like the server certificate. See
+[TLS Certificate Hot-Reload](#tls-certificate-hot-reload).
 :::
 
 ## Upstream Policy

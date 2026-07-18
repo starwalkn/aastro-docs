@@ -181,10 +181,11 @@ aastroctl <command> [flags]
 
 ### Commands
 
-| Command       | Description                                             |
-|---------------|---------------------------------------------------------|
-| `plugin init` | Generate a new plugin or middleware skeleton            |
-| `help`        | Show help for any command (also available via `--help`) |
+| Command          | Description                                               |
+|------------------|-----------------------------------------------------------|
+| `plugin init`    | Generate a new plugin or middleware skeleton              |
+| `openapi export` | Generate an OpenAPI document from a gateway configuration |
+| `help`           | Show help for any command (also available via `--help`)   |
 
 ### Global flags
 
@@ -233,6 +234,52 @@ The generated file is formatted with `gofmt` before writing. If the output path 
 overwrite it.
 
 See [Plugin & Middleware Development](plugin-development) for the full guide on writing plugins.
+
+### `aastroctl openapi export`
+
+Generates an OpenAPI 3.1 (or 3.0) document from a gateway configuration. The configuration is loaded through the same
+pipeline as the gateway itself — defaults applied, validation performed — so the resulting document describes what the
+gateway will actually execute, and a broken configuration fails here before it reaches a deploy.
+
+```bash
+aastroctl openapi export [flags]
+```
+
+**Flags:**
+
+| Flag            | Short | Default       | Description                                                       |
+|-----------------|-------|---------------|-------------------------------------------------------------------|
+| `--config`      | `-c`  | `aastro.yaml` | Path to the gateway configuration                                 |
+| `--out`         | `-o`  | `-`           | Output file (`-` for stdout)                                      |
+| `--format`      |       | by extension  | `yaml` or `json`; inferred from the output extension, else `yaml` |
+| `--oas-version` |       | `3.1`         | OpenAPI version: `3.1` or `3.0`                                   |
+| `--server`      |       | no            | Server URL for `servers[]`; repeat the flag for multiple entries  |
+| `--title`       |       | service name  | `info.title`                                                      |
+| `--api-version` |       | `0.0.0`       | `info.version`                                                    |
+| `--extensions`  |       | off           | Embed `x-aastro` snapshots of each flow for future config import  |
+
+**Examples:**
+
+```bash
+# Generate a request-phase plugin
+# Print the document to stdout
+aastroctl openapi export -c config.yaml
+
+# Write YAML and JSON files (format inferred from the extension)
+aastroctl openapi export -c config.yaml -o openapi.yaml
+aastroctl openapi export -c config.yaml -o openapi.json
+
+# Target OpenAPI 3.0 for older client generators
+aastroctl openapi export -c config.yaml --oas-version 3.0 -o openapi.yaml
+
+# Full metadata for a published spec
+aastroctl openapi export -c config.yaml \
+  --title "Customer API" \
+  --api-version 1.4.0 \
+  --server https://api.example.com \
+  --extensions \
+  -o openapi.yaml
+```
 
 ## Conventions
 

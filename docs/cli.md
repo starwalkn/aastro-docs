@@ -281,6 +281,102 @@ aastroctl openapi export -c config.yaml \
   -o openapi.yaml
 ```
 
+### `aastroctl openapi import`
+
+Generates a gateway configuration from an OpenAPI 3.x document — the inverse of `openapi export`. Documents produced by
+`openapi export --extensions` are reconstructed losslessly; foreign documents are scaffolded into a working starting
+point. The generated configuration is validated before it is written, so `import` never emits a config the gateway
+would reject.
+
+```bash
+aastroctl openapi import -i <document> [flags]
+```
+
+**Flags:**
+
+| Flag             | Short | Default        | Description                                                          |
+|------------------|-------|----------------|----------------------------------------------------------------------|
+| `--in`           | `-i`  | required       | OpenAPI document to import (`yaml` or `json`)                        |
+| `--out`          | `-o`  | `-`            | Output configuration file (`-` for stdout)                          |
+| `--default-host` |       | `servers[0]`   | Upstream host for scaffolded flows; falls back to a placeholder      |
+| `--mode`         |       | `envelope`     | Flow shape for scaffolded operations: `envelope` or `passthrough`   |
+| `--server-port`  |       | `7805`         | Gateway data port written into the generated config                 |
+| `--admin-port`   |       | `9090`         | Gateway admin port written into the generated config                |
+| `--force`        |       | off            | Overwrite the output file if it already exists                      |
+
+**Examples:**
+
+```bash
+# Print the generated configuration to stdout
+aastroctl openapi import -i openapi.yaml
+
+# Write to a file (refuses to overwrite unless --force)
+aastroctl openapi import -i openapi.yaml -o aastro.yaml
+
+# Import a JSON document (format detected automatically)
+aastroctl openapi import -i openapi.json -o aastro.yaml
+
+# Scaffold a foreign spec, pointing every flow at one host
+aastroctl openapi import -i petstore.yaml --default-host https://backend.internal -o aastro.yaml
+
+# Scaffold streaming-style flows as passthrough
+aastroctl openapi import -i events-api.yaml --mode passthrough -o aastro.yaml
+```
+
+#### Lossless import vs. scaffolding
+
+The command has two modes of operation, chosen automatically per operation:
+
+- **Lossless reconstruction** — operations carrying an `x-aastro` extension (written by `openapi export --extensions`)
+  are restored in full: flows, aggregation, upstreams, per-upstream `policy`, and `transport`. Fields left at their
+  gateway defaults are omitted from the result, so the output is minimal and reads like a hand-written config rather
+  than an exhaustive dump.
+- **Scaffolding** — operations without the extension (any third-party document) become single-upstream flows. Path
+  parameters, and the query and header parameters declared on the operation, are turned into `forward_params`,
+  `forward_queries`, and `forward_headers`. The upstream host comes from `--default-host`, then `servers[0]`, then a
+  `https://CHANGE-ME.internal` placeholder. Flows default to `array` aggregation, or to passthrough under
+  `--mode passthrough`.
+
+Some inputs are inferred rather than restored:
+
+- Operations that respond with a streamed `*/*` body are scaffolded as passthrough flows regardless of `--mode`.
+- If any operation carries a `429` response, the rate limiter is enabled with default settings.
+
+#### What is not restored
+
+Secrets and credentials never appear in an OpenAPI document, so they cannot be reconstructed. Where the input signals
+that something was configured, `import` emits a warning instead of guessing:
+
+- **Plugin and middleware configurations** — only their names survive in `x-aastro`. Each is reported so you can
+  re-add its config block manually.
+- **TLS material** — an upstream that used TLS is restored with `tls.enabled: true` and system roots, and a warning
+  reminds you to re-add certificate or CA paths for mTLS or a private CA. The upstream fails the handshake loudly
+  rather than silently downgrading to plain HTTP.
+- **Auth requirements** in foreign documents — a `security` requirement on an operation becomes a warning to configure
+  the `auth` middleware.
+
+Warnings go to stderr; the configuration goes to stdout, so redirection stays clean:
+
+```bash
+aastroctl openapi import -i openapi.yaml -o aastro.yaml 2> import-warnings.log
+```
+
+:::info
+Round-tripping a config through `export --extensions` and back is stable: the topology is reconstructed exactly.
+Plugin and middleware config blocks are the only parts that need re-adding by hand, because their contents are never
+written to the spec.
+:::
+
+:::info
+The generated configuration is intentionally minimal — fields at their gateway defaults are omitted and re-applied on
+load. If you prefer a config with every effective value pinned explicitly (for example, to stay independent of a
+future change in gateway defaults), materialize it with `aastro -T`:
+
+```bash
+aastroctl openapi import -i openapi.yaml -o - | aastro -T -c /dev/stdin > aastro.yaml
+```
+:::
+
 ## Conventions
 
 A few conventions to keep in mind when scripting against either binary.

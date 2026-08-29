@@ -98,7 +98,7 @@ const config = {
             announcementBar: {
               id: 'topbar',
               content:
-                '<span class="topbar-left"><a href="https://github.com/starwalkn/aastro/releases">v0.9.0</a></span>' +
+                '<span class="topbar-left"><a href="https://github.com/starwalkn/aastro/releases">v0.10.0</a></span>' +
                 '<a href="mailto:alexanderpikeev@gmail.com">Contact us</a>',
               backgroundColor: '#0f141a',
               textColor: '#ffffff',

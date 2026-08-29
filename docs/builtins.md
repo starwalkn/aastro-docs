@@ -7,11 +7,13 @@ slug: /builtins
 
 # Built-in Plugins & Middlewares
 
-Aastro ships with a set of ready-to-use plugins and middlewares. They are available without any additional installation — set `source: builtin` in the flow configuration.
+Aastro ships with a set of ready-to-use plugins and middlewares. They are available without any additional installation - set `source: builtin` in the flow configuration.
 
 ## Plugins
 
-Plugins operate on the JSON response body after aggregation. All three built-in plugins run in the **response phase**.
+Plugins operate on the JSON response body after it is built - aggregated for a multi-upstream flow, proxied as-is for
+a single-upstream one. All three built-in plugins run in the **response phase**, so they don't run at all for a
+`streaming: true` flow.
 
 ### camelify
 
@@ -90,11 +92,11 @@ plugins:
 { "email": "alice@example.com", "token": "***", "name": "Alice" }
 ```
 
-Masking is applied recursively — if a specified field appears at any nesting level, it is masked. Field matching is case-sensitive and exact. If `fields` is empty or not configured, the plugin is a no-op.
+Masking is applied recursively - if a specified field appears at any nesting level, it is masked. Field matching is case-sensitive and exact. If `fields` is empty or not configured, the plugin is a no-op.
 
 ## Middlewares
 
-Middlewares wrap the entire flow handler and run for every request. They execute in the order defined in configuration — the first middleware listed is the outermost wrapper.
+Middlewares wrap the entire flow handler and run for every request. They execute in the order defined in configuration - the first middleware listed is the outermost wrapper.
 
 ### recoverer
 
@@ -134,7 +136,7 @@ middlewares:
 | Parameter | Type | Default | Description |
 |---|---|---|---|
 | `enabled` | bool | `true` | Enable the middleware |
-| `log_body` | bool | `false` | Log the request body. Body is read into memory and replayed — do not enable for large payloads |
+| `log_body` | bool | `false` | Log the request body. Body is read into memory and replayed - do not enable for large payloads |
 
 Log output uses structured JSON fields: `method`, `path`, `status`, `duration`, `request_id`, and optionally `body`.
 
@@ -198,7 +200,7 @@ Preflight requests (`OPTIONS` with `Origin` and `Access-Control-Request-Method` 
 
 Validates JWT tokens from the `Authorization: Bearer <token>` header. Supports three key sources: HMAC shared secret, static RSA public key, and JWKS endpoint.
 
-**HS256 — HMAC shared secret:**
+**HS256 - HMAC shared secret:**
 
 ```yaml
 middlewares:
@@ -213,7 +215,7 @@ middlewares:
 
 The `hmac_secret` value must be **base64-encoded**.
 
-**RS256 — static RSA public key:**
+**RS256 - static RSA public key:**
 
 ```yaml
 middlewares:
@@ -229,7 +231,7 @@ middlewares:
         -----END PUBLIC KEY-----
 ```
 
-**RS256 — JWKS endpoint:**
+**RS256 - JWKS endpoint:**
 
 ```yaml
 middlewares:
@@ -246,12 +248,12 @@ middlewares:
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
-| `alg` | string | — | Signing algorithm: `HS256` or `RS256` |
-| `issuer` | string | — | Expected `iss` claim value |
-| `audience` | string | — | Expected `aud` claim value |
-| `hmac_secret` | string | — | Base64-encoded HMAC secret. Required for `HS256` |
-| `rsa_public_key` | string | — | PEM-encoded RSA public key. Used for static RS256 |
-| `jwks_url` | string | — | URL of the JWKS endpoint. Takes priority over `rsa_public_key` for RS256 |
+| `alg` | string | - | Signing algorithm: `HS256` or `RS256` |
+| `issuer` | string | - | Expected `iss` claim value |
+| `audience` | string | - | Expected `aud` claim value |
+| `hmac_secret` | string | - | Base64-encoded HMAC secret. Required for `HS256` |
+| `rsa_public_key` | string | - | PEM-encoded RSA public key. Used for static RS256 |
+| `jwks_url` | string | - | URL of the JWKS endpoint. Takes priority over `rsa_public_key` for RS256 |
 | `jwks_refresh_timeout` | duration | `5s` | HTTP timeout for each JWKS fetch request |
 | `jwks_refresh_interval` | duration | `5m` | How often the JWKS cache is refreshed in the background |
 

@@ -12,9 +12,21 @@ const sidebars = {
             label: 'Core Concepts',
             collapsed: true,
             items: [
-                'configuration',
+                {
+                    type: 'category',
+                    label: 'Configuration',
+                    collapsed: true,
+                    link: {type: 'doc', id: 'configuration/configuration'},
+                    items: [
+                        'configuration/configuration-server-admin',
+                        'configuration/configuration-observability',
+                        'configuration/configuration-routing-flows',
+                        'configuration/configuration-upstreams',
+                        'configuration/configuration-plugins-middlewares',
+                    ],
+                },
                 'response-format',
-                'passthrough',
+                'streaming',
             ],
         },
         {
@@ -40,7 +52,17 @@ const sidebars = {
             label: 'Reference',
             collapsed: true,
             items: [
-                'cli',
+                {
+                    type: 'category',
+                    label: 'CLI',
+                    collapsed: true,
+                    link: {type: 'doc', id: 'cli/cli'},
+                    items: [
+                        'cli/cli-aastro',
+                        'cli/cli-aastroctl',
+                        'cli/cli-conventions',
+                    ],
+                },
             ],
         },
     ],

@@ -1,26 +1,26 @@
 ---
 id: intro
 title: Introduction
-description: Introduction
+description: What Aastro is, its key features, typical use cases, and design philosophy
 slug: /intro
 ---
 
 # Aastro API Gateway
 
 [Aastro](https://github.com/starwalkn/aastro) is a lightweight, extensible API Gateway written in Go.
-It simplifies request routing, fan-out to multiple upstream services, and response aggregation — while remaining fast, predictable, and easy to configure.
+It simplifies request routing, fan-out to multiple upstream services, and response aggregation - while remaining fast, predictable, and easy to configure.
 
 Aastro focuses on **explicit configuration**, **minimal runtime overhead**, and **clear separation of concerns** between routing, middleware, plugins, and upstream policies.
 
 ## Key Features
 
-- **High-performance Go core** — built with simplicity and low latency in mind
-- **Multiple upstreams per route** — dispatch requests to several services in parallel and aggregate their responses
-- **Flexible aggregation strategies** — merge, array, and namespace-based aggregation
-- **Path parameter extraction** — native `{param}` support with automatic forwarding to upstreams
-- **Pluggable architecture** — extend behavior using dynamically loaded `.so` plugins and middlewares
-- **Fine-grained upstream policies** — retries, circuit breaker, load balancing, timeouts, body limits, header filtering
-- **OpenTelemetry observability** — metrics (Prometheus or OTLP) and distributed tracing (OTLP) with W3C trace context propagation
+- **High-performance Go core** - built with simplicity and low latency in mind
+- **Multiple upstreams per route** - dispatch requests to several services in parallel and aggregate their responses
+- **Flexible aggregation strategies** - merge, array, and namespace-based aggregation
+- **Path parameter extraction** - native `{param}` support with automatic forwarding to upstreams
+- **Pluggable architecture** - extend behavior using dynamically loaded `.so` plugins and middlewares
+- **Fine-grained upstream policies** - retries, circuit breaker, load balancing, timeouts, body limits, header filtering
+- **OpenTelemetry observability** - metrics (Prometheus or OTLP) and distributed tracing (OTLP) with W3C trace context propagation
 - **Rate limiting & trusted proxy support**
 - **Declarative YAML configuration**
 
@@ -36,7 +36,7 @@ Aastro focuses on **explicit configuration**, **minimal runtime overhead**, and 
 
 Aastro aims to be:
 
-- **Small, not bloated** — only core gateway responsibilities
-- **Explicit, not magical** — behavior is visible in configuration
-- **Composable** — features are built from simple primitives
-- **Observable by default** — metrics, traces, and request IDs are first-class, not afterthoughts
+- **Small, not bloated** - only core gateway responsibilities
+- **Explicit, not magical** - behavior is visible in configuration
+- **Composable** - features are built from simple primitives
+- **Observable by default** - metrics, traces, and request IDs are first-class, not afterthoughts

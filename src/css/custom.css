@@ -1,7 +1,8 @@
 @import '@fontsource/jetbrains-mono/500.css';
+@import '@fontsource/jetbrains-mono/500-italic.css';
 @import '@fontsource/jetbrains-mono/700.css';
 
-@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400..800&family=Manrope:wght@600;700&display=swap');
 
 :root {
     --ifm-color-primary: #1A6FD4;
@@ -27,18 +28,19 @@
 
     --aastro-hero-bg-gradient: linear-gradient(180deg, #0f141a 0%, #1a2335 100%);
 
-    --aastro-font-sans: "Source Sans 3", sans-serif;
-    --aastro-font-display: "Source Sans 3", serif;
+    --aastro-font-sans: "Public Sans", sans-serif;
+    --aastro-font-display: "Manrope", sans-serif;
     --aastro-font-mono: "JetBrains Mono", monospace;
     --ifm-font-family-base: var(--aastro-font-sans);
 
     --aastro-weight-body: 400;
-    --aastro-weight-link: 500;
+    --aastro-weight-strong: 600;
+    --aastro-weight-link: 600;
     --aastro-weight-mono: 500;
-    --aastro-weight-heading: 750;
+    --aastro-weight-heading: 700;
 
     --aastro-size-hero: clamp(2.5rem, 5vw, 3.5rem);
-    --aastro-size-h1: 2.8rem;
+    --aastro-size-h1: 2.15rem;
     --aastro-size-h2: 1.8rem;
     --aastro-size-body: 1.1em;
     --aastro-size-code: 0.85em;
@@ -47,8 +49,8 @@
     --aastro-link-underline-thickness: 2px;
     --aastro-link-underline-offset: 3px;
 
-    --aastro-pre-background: #fafafa;
-    --aastro-pre-border: #d5dbdb;
+    --aastro-pre-background: #EAF3FB;
+    --aastro-pre-border: #C6DFF3;
 
     --ifm-code-font-size: 95%;
 
@@ -67,6 +69,8 @@
     --docusaurus-collapse-button-bg: transparent;
     --docusaurus-collapse-button-bg-hover: rgba(26, 111, 212, 0.06);
     --docusaurus-highlighted-code-line-bg: rgba(26, 111, 212, 0.08);
+
+    --aastro-announcement-bar-height: 36px;
 }
 
 .main-wrapper:not(:has(.theme-doc-sidebar-container)) {
@@ -130,9 +134,10 @@
 }
 
 .markdown h1,
-h2,
-h3 {
-    font-family: var(--aastro-font-sans), serif;
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+    font-family: var(--aastro-font-display), sans-serif;
     font-weight: var(--aastro-weight-heading);
 }
 
@@ -141,7 +146,7 @@ h3 {
     color: #0f141a;
     padding-bottom: 0.6rem;
     border-bottom: 1.5px solid #d5dbdb;
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.75rem;
 }
 
 .markdown h2 {
@@ -152,35 +157,31 @@ h3 {
 
 .markdown p {
     font-size: var(--aastro-size-body);
-    font-weight: 500;
+    font-weight: var(--aastro-weight-body);
     color: #0f141a;
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
 .markdown li {
     font-size: var(--aastro-size-body);
-    font-weight: 500;
+    font-weight: var(--aastro-weight-body);
     color: #0f141a;
-    line-height: 1.5;
+    line-height: 1.6;
     margin-top: 0.15rem;
-}
-
-.markdown td {
-    font-size: var(--aastro-size-body);
-    font-weight: 500;
-    color: #0f141a;
 }
 
 .markdown a {
     font-weight: var(--aastro-weight-link);
     text-decoration: none;
-    text-decoration-thickness: var(--aastro-link-underline-thickness);
-    text-underline-offset: var(--aastro-link-underline-offset);
 }
 
-.markdown a:hover {
+.markdown a:hover,
+.markdown a:focus-visible {
     color: var(--ifm-color-primary-dark);
     text-decoration: underline;
+    text-decoration-color: currentColor;
+    text-decoration-thickness: var(--aastro-link-underline-thickness);
+    text-underline-offset: var(--aastro-link-underline-offset);
 }
 
 .markdown hr {
@@ -193,11 +194,13 @@ h3 {
     color: var(--ifm-heading-color);
     background-color: var(--aastro-pre-background);
     border: 1px solid var(--aastro-pre-border);
-    padding: 0.1rem 0.35rem;
-    border-radius: 8px;
+    padding: 0.05rem 0.35rem;
+    border-radius: 6px;
     font-family: var(--aastro-font-mono);
     font-size: var(--aastro-size-code);
     font-weight: var(--aastro-weight-mono);
+    line-height: 1.5;
+    white-space: nowrap;
 }
 
 .table-of-contents {
@@ -234,8 +237,31 @@ h3 {
     border-bottom: 1px solid var(--aastro-border-strong);
     box-shadow: none;
     position: sticky;
-    top: 36px;
+    top: var(--aastro-announcement-bar-height);
     z-index: 199;
+}
+
+/* The sticky doc sidebar and table-of-contents assume only the navbar is
+   pinned to the top of the viewport. Since the announcement bar above is
+   also sticky and never dismissed, offset both by its height so the header
+   doesn't creep over them while scrolling. */
+.theme-doc-sidebar-container > div[class*="sidebarViewport"] {
+    top: var(--aastro-announcement-bar-height);
+    max-height: calc(100vh - var(--aastro-announcement-bar-height));
+}
+
+.theme-doc-toc-desktop {
+    top: calc(var(--ifm-navbar-height) + var(--aastro-announcement-bar-height) + 1rem) !important;
+    max-height: calc(100vh - (var(--ifm-navbar-height) + var(--aastro-announcement-bar-height) + 2rem)) !important;
+}
+
+/* Docusaurus offsets heading anchor targets by the navbar height alone
+   (scroll-margin-top) so clicking a TOC/hash link doesn't land the heading
+   under the sticky navbar. It doesn't know about the announcement bar
+   stacked above the navbar, so add its height too, or the heading still
+   ends up hidden behind the header when jumped to. */
+.anchor {
+    scroll-margin-top: calc(var(--ifm-navbar-height) + var(--aastro-announcement-bar-height) + 0.5rem) !important;
 }
 
 .navbar--hidden {
@@ -381,6 +407,14 @@ h3 {
     padding-left: 1.5rem;
 }
 
+/* Categories that link to their own page (e.g. Configuration, CLI) render
+   their toggle as a separate button instead of folding it into the link,
+   so the link itself never gets the gutter above. Match it anyway so its
+   label lines up with sibling pages instead of sitting to their left. */
+.menu__list-item-collapsible > .menu__link:not(.menu__link--sublist-caret) {
+    padding-left: 1.5rem;
+}
+
 /* Filled triangle, rounded corners, sitting in the left gutter */
 .menu__list-item-collapsible > .menu__link--sublist-caret::before {
     content: "";
@@ -400,6 +434,29 @@ h3 {
 /* Rotate the triangle down when the category is expanded */
 .menu__list-item-collapsible > .menu__link--sublist-caret[aria-expanded="true"]::before {
     transform: translateY(-50%) rotate(90deg);
+}
+
+/* Categories that link to their own page (e.g. Configuration, CLI) render
+   their toggle as a separate button instead of as part of the link, and by
+   default it uses Infima's chevron icon. Restyle it to match the filled
+   triangle used by the other sidebar categories. */
+.menu__caret::before {
+    content: "" !important;
+    background: none !important;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><path d="M3 1.5 L7.5 5 L3 8.5 Z" fill="%23424650" stroke="%23424650" stroke-width="1.4" stroke-linejoin="round"/></svg>') !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: 0.6rem 0.6rem !important;
+    filter: none !important;
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    transform: rotate(0deg) !important;
+    transition: transform 0.15s ease !important;
+}
+
+/* Rotate the triangle down when the category is expanded */
+.menu__caret[aria-expanded="true"]::before {
+    transform: rotate(90deg) !important;
 }
 
 .theme-doc-version-badge {
@@ -456,7 +513,7 @@ div[class*="admonition"][class*="success"] {
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     backdrop-filter: blur(12px);
     padding: 0;
-    min-height: 36px;
+    min-height: var(--aastro-announcement-bar-height);
     display: flex;
     align-items: center;
     position: sticky;
@@ -547,11 +604,6 @@ div[class*="admonition"][class*="success"] {
 }
 
 
-/* ============================================================
-   ДОБАВИТЬ В custom.css — стилизация контента документации.
-   Вставь этот блок ПЕРЕД секцией @media (max-width: 996px).
-   ============================================================ */
-
 /* --- Tables: AWS-style clean tables --- */
 .markdown table {
     display: table;
@@ -573,7 +625,7 @@ div[class*="admonition"][class*="success"] {
 }
 
 .markdown table th {
-    font-weight: 700;
+    font-weight: var(--aastro-weight-strong);
     color: #0f141a;
     text-align: left;
     padding: 0.65rem 0.9rem;
@@ -581,6 +633,10 @@ div[class*="admonition"][class*="success"] {
 }
 
 .markdown table td {
+    font-size: var(--aastro-size-body);
+    font-weight: var(--aastro-weight-body);
+    color: #0f141a;
+    line-height: 1.6;
     padding: 0.6rem 0.9rem;
     border: none;
     border-top: 1px solid #eceff1;
@@ -604,34 +660,39 @@ div[class*="admonition"][class*="success"] {
 .markdown table code {
     font-size: 0.85em;
     padding: 0.05rem 0.3rem;
-    white-space: nowrap;
 }
 
 /* --- Headings hierarchy for reference-heavy pages --- */
 .markdown h3 {
     font-size: 1.3rem;
-    font-weight: 700;
     color: #0f141a;
     margin-top: 2rem;
     margin-bottom: 0.75rem;
-    padding-bottom: 0.3rem;
-    border-bottom: 1px solid #eceff1;
 }
 
 .markdown h4 {
     font-size: 1.05rem;
-    font-weight: 700;
     color: #0f141a;
     margin-top: 1.5rem;
     margin-bottom: 0.5rem;
 }
 
-/* --- Anchor links on headings (the # that appears on hover) --- */
+/* --- Anchor links on headings (the paragraph mark that appears on hover) --- */
 .markdown .hash-link {
     color: var(--ifm-color-primary);
     opacity: 0;
     padding-left: 0.4rem;
     transition: opacity 0.15s ease;
+}
+
+.markdown .hash-link::before {
+    content: '§';
+}
+
+.markdown .hash-link,
+.markdown .hash-link:hover,
+.markdown .hash-link:focus-visible {
+    text-decoration: none;
 }
 
 .markdown h1:hover .hash-link,
@@ -643,13 +704,13 @@ div[class*="admonition"][class*="success"] {
 
 /* --- Code block comments: make them readable but subdued --- */
 .markdown pre code .token.comment {
-    color: #6a8caa;
+    color: #5C7691;
     font-style: italic;
 }
 
 /* --- Strong/bold text in body --- */
 .markdown strong {
-    font-weight: 700;
+    font-weight: var(--aastro-weight-strong);
     color: #0f141a;
 }
 

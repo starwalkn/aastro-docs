@@ -7,16 +7,16 @@ slug: /plugin-development
 
 # Plugin & Middleware Development
 
-Aastro can be extended with custom plugins and middlewares compiled as Go shared objects (`.so`). Both use the same loading mechanism — the difference is when and how they execute.
+Aastro can be extended with custom plugins and middlewares compiled as Go shared objects (`.so`). Both use the same loading mechanism - the difference is when and how they execute.
 
-- **Plugin** — invoked at a specific phase in the request lifecycle (before scatter or after aggregation). Works with the gateway's `sdk.Context`.
-- **Middleware** — wraps the entire flow handler as a standard `http.Handler`. Executes for every request regardless of upstream results.
+- **Plugin** - invoked at a specific phase in the request lifecycle (before the upstream call, or after the response is built - aggregated for a multi-upstream flow, proxied as-is for a single-upstream one). Works with the gateway's `sdk.Context`.
+- **Middleware** - wraps the entire flow handler as a standard `http.Handler`. Executes for every request regardless of upstream results.
 
 ## Requirements
 
 - Go version from `aastro -V`
 - The plugin must be compiled with the **exact same Go version** as the gateway binary. A mismatch causes a panic at startup.
-- Import `github.com/starwalkn/aastro/sdk` — this is the only dependency required.
+- Import `github.com/starwalkn/aastro/sdk` - this is the only dependency required.
 
 ## Writing a Plugin
 
@@ -35,10 +35,10 @@ type Plugin interface {
 
 | Constant | Phase | What you can do |
 |---|---|---|
-| `sdk.PluginTypeRequest` | Before upstream scatter | Read and modify request headers, add context values |
-| `sdk.PluginTypeResponse` | After aggregation | Read and modify response headers and body |
+| `sdk.PluginTypeRequest` | Before the upstream call | Read and modify request headers, add context values |
+| `sdk.PluginTypeResponse` | After the response is built | Read and modify response headers and body |
 
-### Example: request plugin that adds a header
+### Example: Request Plugin That Adds a Header
 
 ```go
 package main
@@ -74,7 +74,7 @@ func (p *requestIDPlugin) Execute(ctx sdk.Context) error {
 }
 ```
 
-### Example: response plugin that transforms the body
+### Example: Response Plugin That Transforms the Body
 
 ```go
 package main
@@ -143,10 +143,10 @@ type Context interface {
 }
 ```
 
-In the **request phase**, `Response()` returns `nil` — aggregation has not happened yet. In the **response phase**, both `Request()` and `Response()` are available.
+In the **request phase**, `Response()` returns `nil` - the upstream hasn't been called yet. In the **response phase**, both `Request()` and `Response()` are available.
 
 :::warning
-`SetResponse` must be called after any modification to the response — modifying the `*http.Response` fields directly without calling `SetResponse` has no effect on the final output.
+`SetResponse` must be called after any modification to the response - modifying the `*http.Response` fields directly without calling `SetResponse` has no effect on the final output.
 :::
 
 ## Writing a Middleware
@@ -171,7 +171,7 @@ type Closer interface {
 
 Aastro calls `Close()` on shutdown for any middleware that implements it.
 
-### Example: simple logger middleware
+### Example: Simple Logger Middleware
 
 ```go
 package main
@@ -226,11 +226,7 @@ go build -buildmode=plugin -o myplugin.so ./myplugin
 go build -buildmode=plugin -o mymiddleware.so ./mymiddleware
 ```
 
-The exported entry point must be named exactly `NewPlugin` for plugins and `NewMiddleware` for middlewares. Aastro looks up these symbols by name at load time.
-
-:::info
-`-buildmode=plugin` is only supported on Linux and macOS. Windows is not supported.
-:::
+The exported entry point must be named exactly `NewPlugin` for plugins and `NewMiddleware` for middlewares. Aastro looks up these symbols by name at load time. Note that `-buildmode=plugin` is only supported on Linux and macOS - Windows is not supported.
 
 ## Project Structure
 
@@ -243,7 +239,7 @@ myplugin/
 └── Makefile
 ```
 
-`go.mod` must declare `package main` is fine — the binary is never run directly.
+`go.mod` must declare `package main` is fine - the binary is never run directly.
 
 The `go.mod` should reference the same `github.com/starwalkn/aastro/sdk` version as the gateway:
 
@@ -286,11 +282,12 @@ The `path` field points to the **directory** containing the `.so` file. Aastro r
 ```
 Middlewares (outermost first)
   └── Request plugins (in config order)
-        └── Upstream scatter
-              └── Aggregation
-                    └── Response plugins (in config order)
+        └── Upstream call(s) - scatter + aggregation for >1 upstream, a direct proxy call for exactly 1
+              └── Response plugins (in config order)
 ```
 
-Middlewares wrap the entire handler including plugins. Within each phase, plugins execute in the order they appear in configuration.
+Middlewares wrap the entire handler including plugins. Within each phase, plugins execute in the order they appear in
+configuration. Response plugins are skipped entirely for a `streaming: true` flow - the body is already streaming to
+the client by the time they would run; see [Streaming & SSE](streaming).
 
-Plugins with the same `name` are deduplicated — if the same plugin is listed twice in a flow, it is loaded and executed only once.
+Plugins with the same `name` are deduplicated - if the same plugin is listed twice in a flow, it is loaded and executed only once.

@@ -8,7 +8,7 @@ slug: /tracing
 # Tracing
 
 Aastro uses [OpenTelemetry](https://opentelemetry.io/) for distributed tracing. Spans are exported via OTLP/HTTP to any
-OpenTelemetry-compatible backend — OTel Collector, Jaeger, Tempo, Datadog, Honeycomb.
+OpenTelemetry-compatible backend - OTel Collector, Jaeger, Tempo, Datadog, Honeycomb.
 
 W3C `traceparent` and `tracestate` headers are propagated automatically: incoming traces are continued, outgoing
 requests to upstreams carry the trace context. The propagator is installed regardless of whether tracing is enabled, so
@@ -30,11 +30,11 @@ gateway:
 | Field                    | Type     | Default | Description                                                      |
 |--------------------------|----------|---------|------------------------------------------------------------------|
 | `tracing.enabled`        | bool     | `false` | Enable tracing instrumentation                                   |
-| `tracing.exporter`       | string   | —       | Currently only `otlp` is supported                               |
+| `tracing.exporter`       | string   | -       | Currently only `otlp` is supported                               |
 | `tracing.sampling_ratio` | float    | `1.0`   | Fraction of new root traces to sample. `1.0` = all, `0.0` = none |
-| `tracing.otlp.endpoint`  | string   | —       | OTLP HTTP endpoint to push spans to                              |
+| `tracing.otlp.endpoint`  | string   | -       | OTLP HTTP endpoint to push spans to                              |
 | `tracing.otlp.insecure`  | bool     | `false` | Disable TLS for the OTLP connection                              |
-| `tracing.otlp.interval`  | duration | `5s`    | Batch timeout — maximum time before a non-full batch is flushed  |
+| `tracing.otlp.interval`  | duration | `5s`    | Batch timeout - maximum time before a non-full batch is flushed  |
 
 :::info
 `tracing.otlp.interval` is the batch timeout, not a push interval. Spans are also flushed automatically when the batch
@@ -57,19 +57,22 @@ aastro.request                   [SpanKindServer]
 └── aastro.plugin response-phase plugin
 ```
 
-Passthrough flows skip `aastro.scatter` and have a single `aastro.upstream` span:
+Streaming flows skip `aastro.scatter` and have a single `aastro.upstream` span:
 
 ```
 aastro.request                   [SpanKindServer]
-└── aastro.upstream              [SpanKindClient, mode=passthrough]
+└── aastro.upstream              [SpanKindClient, mode=streaming]
 ```
+
+A non-streaming flow with exactly one upstream still goes through `aastro.scatter` - with
+`aastro.upstream.count=1` - followed by a single `aastro.upstream` child span, same shape as the fan-out case.
 
 | Span            | When opened                               | When closed                                  | Parent                                             |
 |-----------------|-------------------------------------------|----------------------------------------------|----------------------------------------------------|
 | `aastro.request`  | Request enters `Router.ServeHTTP`         | Response written or rate-limit rejection     | Remote (from `traceparent`) or none                |
 | `aastro.plugin`   | Before each plugin's `Execute`            | After plugin returns                         | `aastro.request`                                     |
-| `aastro.scatter`  | Beginning of scatter fan-out              | All upstream goroutines completed            | `aastro.request`                                     |
-| `aastro.upstream` | Beginning of upstream call (per upstream) | Upstream call returns, including all retries | `aastro.scatter` (or `aastro.request` for passthrough) |
+| `aastro.scatter`  | Beginning of scatter fan-out (or the single-upstream call) | All upstream goroutines completed, or the single call returns | `aastro.request`                    |
+| `aastro.upstream` | Beginning of upstream call (per upstream) | Upstream call returns, including all retries | `aastro.scatter` (or `aastro.request` for streaming) |
 
 ## Span Attributes
 
@@ -81,7 +84,7 @@ aastro.request                   [SpanKindServer]
 | `http.route`               | Matched flow path with parameter placeholders, e.g. `/users/{id}`                   |
 | `url.path`                 | Raw request path                                                                    |
 | `http.status_code`         | Final response status                                                               |
-| `aastro.request.id`          | ULID identifying the request                                                        |
+| `aastro.request.id`          | UUIDv7 identifying the request                                                       |
 | `aastro.request.fingerprint` | 16-char hex hash of method, route template, header names, and query parameter names |
 
 ### `aastro.upstream`
@@ -95,7 +98,7 @@ aastro.request                   [SpanKindServer]
 | `aastro.upstream.name`       | Configured upstream name                                      |
 | `aastro.upstream.host`       | Host selected by the load balancer                            |
 | `aastro.upstream.error_kind` | Error classification on failure (see [Metrics](./metrics.md)) |
-| `aastro.upstream.mode`       | `passthrough` for passthrough flows; absent otherwise         |
+| `aastro.upstream.mode`       | `streaming` for streaming flows; absent otherwise              |
 | `aastro.flow.path`           | Flow path the upstream was called from                        |
 
 ### `aastro.scatter`
@@ -129,7 +132,7 @@ Additional attributes from the `OTEL_RESOURCE_ATTRIBUTES` environment variable a
 ## Sampling
 
 Sampling determines which traces are recorded. Aastro uses a `ParentBased` sampler that respects the incoming
-`traceparent` flag — if an upstream service has already decided to sample a trace, aastro honors that decision regardless
+`traceparent` flag - if an upstream service has already decided to sample a trace, aastro honors that decision regardless
 of `sampling_ratio`. Only **new root traces** (requests without an incoming `traceparent`) are subject to ratio-based
 sampling.
 
@@ -139,10 +142,10 @@ sampling.
 | `0.1`            | 10% sampled, deterministically by trace ID               |
 | `0.0`            | None sampled, but incoming sampled traces still recorded |
 
-The decision for `TraceIDRatioBased(ratio)` is made by hashing the trace ID — the same trace ID always yields the same
+The decision for `TraceIDRatioBased(ratio)` is made by hashing the trace ID - the same trace ID always yields the same
 decision across services, ensuring trace consistency.
 
-:::info
+:::tip
 For development and staging, use `sampling_ratio: 1.0` to capture all traces. For production at high RPS, lower values (
 e.g. `0.05`) keep ingestion costs manageable while still providing statistical visibility.
 :::
@@ -151,15 +154,15 @@ e.g. `0.05`) keep ingestion costs manageable while still providing statistical v
 
 Aastro propagates W3C trace context bidirectionally:
 
-- **Inbound** — `traceparent` and `tracestate` headers from incoming requests are extracted into the request context.
+- **Inbound** - `traceparent` and `tracestate` headers from incoming requests are extracted into the request context.
   The resulting `aastro.request` span becomes a child of the upstream's span.
-- **Outbound** — when calling an upstream, aastro injects the current trace context into the outgoing request's
+- **Outbound** - when calling an upstream, aastro injects the current trace context into the outgoing request's
   `traceparent` header. If the upstream is OTel-instrumented, its handler will see aastro's span as the parent.
 
 `baggage` headers are also propagated, allowing cross-service key-value context (e.g. `tenant_id`) to flow through the
 gateway.
 
-The propagator is installed unconditionally — even with `tracing.enabled: false`, aastro still extracts and re-injects
+The propagator is installed unconditionally - even with `tracing.enabled: false`, aastro still extracts and re-injects
 `traceparent`. This makes the gateway transparent to distributed tracing even when its own spans are not recorded.
 
 ## Disabled Mode
@@ -168,7 +171,7 @@ When `tracing.enabled: false`:
 
 - No spans are exported.
 - No OTLP connection is opened.
-- The W3C propagator is still installed — incoming `traceparent` headers are forwarded to upstreams unchanged.
+- The W3C propagator is still installed - incoming `traceparent` headers are forwarded to upstreams unchanged.
 - The internal `otel.Tracer` returns a no-op tracer; instrumented code paths run with minimal overhead.
 
 ## Setup with OpenTelemetry Collector
@@ -241,17 +244,17 @@ gateway:
         interval: 1s
 ```
 
-After a request, find the trace in Jaeger UI at `http://localhost:16686` — service `aastro`, operation `aastro.request`.
+After a request, find the trace in Jaeger UI at `http://localhost:16686` - service `aastro`, operation `aastro.request`.
 
 ## Reading Waterfalls
 
 A few patterns to recognize when looking at a aastro trace:
 
 **`aastro.upstream` span with error status and `aastro.upstream.error_kind=connection`.** The upstream was unreachable.
-Check the `aastro_circuit_breaker_state` metric — if it is `1` (open), the breaker rejected subsequent requests without
+Check the `aastro_circuit_breaker_state` metric - if it is `1` (open), the breaker rejected subsequent requests without
 contacting the upstream.
 
-**Trace stops at `aastro.request` with no upstream spans.** The request was rejected before reaching the scatter — usually
+**Trace stops at `aastro.request` with no upstream spans.** The request was rejected before reaching the scatter - usually
 due to a payload-too-large error, or a plugin failure. Look at `http.status_code` on `aastro.request`.
 
 **Single trace spanning multiple services.** When upstreams are also OTel-instrumented, their spans appear as children

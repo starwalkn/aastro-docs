@@ -50,9 +50,6 @@ gateway:
     flows:
       - path: /api/hello
         method: GET
-        aggregation:
-          strategy: array
-          best_effort: false
         upstreams:
           - name: hello
             hosts: http://your-service.local
@@ -60,6 +57,9 @@ gateway:
             method: GET
             timeout: 3s
 ```
+
+A flow with a single upstream (like this one) doesn't need `aggregation` - there's nothing to aggregate. The
+upstream's response is proxied to the client as-is; see [Single-Upstream Flows](response-format#single-upstream-flows-proxy-mode).
 
 Start the gateway:
 

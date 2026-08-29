@@ -1,20 +1,30 @@
 // @ts-check
 import {themes as prismThemes} from 'prism-react-renderer';
 
-const duotoneSea = {
+const aastroCode = {
     plain: {
-        color: '#1D3B53',
-        backgroundColor: '#F8FBFF',
+        color: '#0f141a',
+        backgroundColor: '#EAF3FB',
     },
     styles: [
-        { types: ['comment', 'prolog', 'doctype', 'cdata'], style: { color: '#8CA0B3', fontStyle: 'italic' } },
-        { types: ['keyword', 'tag', 'operator'], style: { color: '#0C71C3' } },
-        { types: ['string', 'attr-value', 'char'], style: { color: '#1B7AC4' } },
-        { types: ['function', 'class-name'], style: { color: '#1A6FD4' } },
-        { types: ['number', 'boolean', 'constant'], style: { color: '#0A5A9C' } },
-        { types: ['punctuation'], style: { color: '#3D5A78' } },
-        { types: ['variable', 'property'], style: { color: '#2C6FAC' } },
-        { types: ['atrule', 'builtin'], style: { color: '#0C5A96' } },
+        // Quiet — comments recede rather than compete
+        { types: ['comment', 'prolog', 'doctype', 'cdata'], style: { color: '#5C7691', fontStyle: 'italic' } },
+        // Violet — control flow (keywords, operators, tags)
+        { types: ['keyword', 'tag', 'operator'], style: { color: '#6B4FA3' } },
+        // Amber — literal string values, the warm counterweight to the blue background
+        { types: ['string', 'attr-value', 'char'], style: { color: '#B45A12' } },
+        // Deep navy — function and type names, distinct from the brighter brand blue below
+        { types: ['function', 'class-name'], style: { color: '#0B4A85' } },
+        // Teal — numeric and boolean literals
+        { types: ['number', 'boolean', 'constant'], style: { color: '#0E7D6B' } },
+        // Neutral slate — structural punctuation stays out of the way
+        { types: ['punctuation'], style: { color: '#51697F' } },
+        // Brand blue — reserved for the token readers scan for most: YAML/JSON keys.
+        // Prism's YAML grammar tags keys as `key` aliased to `atrule`, so both must
+        // resolve to this same rule or the alias silently wins with the wrong color.
+        { types: ['variable', 'property', 'key', 'atrule'], style: { color: '#1A6FD4' } },
+        // Muted magenta-violet — builtins only (e.g. bash/go builtin functions)
+        { types: ['builtin'], style: { color: '#8452A8' } },
     ],
 };
 
@@ -88,7 +98,7 @@ const config = {
             announcementBar: {
               id: 'topbar',
               content:
-                '<span class="topbar-left"><a href="https://github.com/starwalkn/aastro/releases">v0.8.0</a></span>' +
+                '<span class="topbar-left"><a href="https://github.com/starwalkn/aastro/releases">v0.9.0</a></span>' +
                 '<a href="mailto:alexanderpikeev@gmail.com">Contact us</a>',
               backgroundColor: '#0f141a',
               textColor: '#ffffff',
@@ -97,8 +107,8 @@ const config = {
             navbar: {
                 title: 'Aastro',
                 logo: {
-                    alt: 'Rabbit',
-                    src: 'img/rabbt.svg',
+                    alt: 'Aastro',
+                    src: 'img/aastro.svg',
                 },
                 items: [
                     {
@@ -122,8 +132,8 @@ const config = {
             footer: {
                 style: 'dark',
                 logo: {
-                    alt: 'Rabbit',
-                    src: 'img/rabbt-dark.svg',
+                    alt: 'Aastro Dark',
+                    src: 'img/aastro-dark.svg',
                     width: 120,
                     height: 120,
                     href: 'https://github.com/starwalkn/aastro',
@@ -176,7 +186,7 @@ const config = {
                 copyright: `Copyright © ${new Date().getFullYear()} Alexander Pikeev.<br/>Built with Docusaurus.`,
             },
             prism: {
-                theme: duotoneSea,
+                theme: aastroCode,
                 darkTheme: prismThemes.dracula,
                 additionalLanguages: ['bash'],
             },

@@ -31,7 +31,7 @@ const docs = [
     {
         title: 'SSE',
         description: 'Streaming proxy mode for SSE and chunked transfer.',
-        href: '/docs/passthrough',
+        href: '/docs/streaming',
     },
 ];
 
